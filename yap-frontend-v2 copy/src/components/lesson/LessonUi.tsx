@@ -66,6 +66,33 @@ export default function LessonUi({ lessonId, onComplete, isCompleting }: LessonU
     }
   };
 
+  // Add ElevenLabs audio function
+  const playElevenLabsAudio = async (text: string) => {
+    try {
+      const response = await fetch('/api/elevenlabs-tts', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          text: text,
+          voiceId: 'spanish-voice' // You can customize this
+        })
+      });
+      
+      if (response.ok) {
+        const audioBlob = await response.blob();
+        const audioUrl = URL.createObjectURL(audioBlob);
+        const audio = new Audio(audioUrl);
+        audio.play();
+      } else {
+        console.error('ElevenLabs API error:', response.status);
+      }
+    } catch (error) {
+      console.error('ElevenLabs audio error:', error);
+    }
+  };
+
   return (
     <div className="min-h-screen bg-background-primary flex flex-col">
       {/* Header */}

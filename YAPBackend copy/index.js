@@ -382,6 +382,51 @@ app.get('/api/teacher-session/:userId', async (req, res) => {
   }
 });
 
+// ElevenLabs TTS endpoint
+app.post('/api/elevenlabs-tts', async (req, res) => {
+  try {
+    const { text, voiceId = 'spanish-voice' } = req.body;
+    
+    if (!text) {
+      return res.status(400).json({ error: 'Text is required' });
+    }
+
+    const response = await fetch(`https://api.elevenlabs.io/v1/text-to-speech/${voiceId}`, {
+      method: 'POST',
+      headers: {
+        'Accept': 'audio/mpeg',
+        'Content-Type': 'application/json',
+        'xi-api-key': process.env.ELEVENLABS_API_KEY
+      },
+      body: JSON.stringify({
+        text: text,
+        model_id: "eleven_multilingual_v2",
+        voice_settings: {
+          stability: 0.5,
+          similarity_boost: 0.5
+        }
+      })
+    });
+
+    if (!response.ok) {
+      throw new Error(`ElevenLabs API error: ${response.status}`);
+    }
+
+    const audioBuffer = await response.arrayBuffer();
+    
+    res.set({
+      'Content-Type': 'audio/mpeg',
+      'Content-Length': audioBuffer.byteLength
+    });
+    
+    res.send(Buffer.from(audioBuffer));
+    
+  } catch (error) {
+    console.error('ElevenLabs TTS error:', error);
+    res.status(500).json({ error: 'Failed to generate audio' });
+  }
+});
+
 // Health check
 app.get('/api/health', (req, res) => {
   res.json({ status: 'OK', timestamp: new Date().toISOString() });
