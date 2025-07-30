@@ -9,4 +9,5 @@ uploads/
 *.log
 dist/
 build/
-.next/
+.next/*.env
+.env*
