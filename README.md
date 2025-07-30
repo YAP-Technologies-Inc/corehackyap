@@ -1,145 +1,369 @@
-# YAP Integration
+# YAP Token System - Pond Hackathon
 
-这个仓库包含了 YAP 项目的前端 (Next.js) 和后端 (Node.js)。
+A complete Web3 language learning application with token rewards and consumption system built for the Pond Hackathon.
 
-## 项目结构
+## 🚀 Features
 
-- `yap-frontend-v2 copy/` — Next.js 15 前端 (React 19, TailwindCSS 4)
-- `YAPBackend copy/` — Node.js 后端 (Express, ethers, 等)
+### 🪙 YAP Token System
+- **Token Rewards**: Students earn YAP tokens upon completing lessons
+- **Token Consumption**: AI conversational features consume YAP tokens
+- **Ethereum Integration**: Deployed on Sepolia testnet with smart contracts
 
-## 功能特性
+### 🔗 MetaMask Wallet Integration
+- Seamless MetaMask wallet connection
+- Automatic network switching to Ethereum
+- Real-time token and ETH balance display
+- Secure transaction handling
 
-### 🪙 代币奖励系统
-- 学生完成课程后获得 YAP 代币奖励
-- 使用 AI 对话功能需要消费 YAP 代币
-- 基于 Sei 测试网的智能合约
+### 🎓 Language Learning Platform
+- Spanish language lessons with interactive content
+- Progress tracking and statistics
+- Daily learning streaks
+- Pronunciation assessment (Azure Speech Services)
 
-### 🔗 MetaMask 钱包集成
-- 支持 MetaMask 钱包连接
-- 自动切换到 Sei 测试网
-- 实时显示代币余额
-
-### 🎓 学习系统
-- 西班牙语课程学习
-- 课程完成进度跟踪
-- 每日学习统计
+### 🏗️ Technical Stack
+- **Frontend**: Next.js 15, React 19, TailwindCSS 4
+- **Backend**: Node.js, Express, PostgreSQL
+- **Blockchain**: Ethereum Sepolia testnet, ethers.js
+- **Smart Contracts**: Solidity, Hardhat deployment
 
 ---
 
-## 快速开始
+## 📁 Project Structure
 
-### 1. 克隆仓库
-```sh
-git clone https://github.com/YAP-Technologies-Inc/yap-integration.git
-cd yap-integration
+```
+yap-integration-main/
+├── yap-frontend-v2 copy/          # Next.js frontend application
+│   ├── src/
+│   │   ├── app/                   # Next.js app router pages
+│   │   ├── components/            # React components
+│   │   │   ├── auth/             # Authentication components
+│   │   │   ├── dashboard/        # Dashboard components
+│   │   │   ├── lesson/           # Lesson components
+│   │   │   ├── wallet/           # MetaMask integration
+│   │   │   └── ui/               # UI components
+│   │   ├── hooks/                # Custom React hooks
+│   │   ├── context/              # React context providers
+│   │   └── mock/                 # Mock data
+│   └── public/                   # Static assets
+├── YAPBackend copy/              # Node.js backend server
+│   ├── index.js                  # Main server file
+│   ├── azurePronunciation.js     # Azure Speech Services integration
+│   └── uploads/                  # File uploads directory
+└── yap-token-deployment/         # Smart contract deployment
+    ├── contracts/                # Solidity contracts
+    ├── scripts/                  # Deployment scripts
+    └── hardhat.config.js         # Hardhat configuration
 ```
 
-### 2. 安装依赖
-#### 后端
-```sh
+---
+
+## 🛠️ Quick Start
+
+### Prerequisites
+- Node.js 18+ 
+- MetaMask browser extension
+- PostgreSQL database
+- Infura API key (for Ethereum RPC)
+- Etherscan API key (for contract verification)
+
+### 1. Clone Repository
+```bash
+git clone https://github.com/YAP-Technologies-Inc/pondhackathon.git
+cd pondhackathon
+```
+
+### 2. Install Dependencies
+
+#### Backend
+```bash
 cd "YAPBackend copy"
 npm install
 ```
-#### 前端
-```sh
+
+#### Frontend
+```bash
 cd "yap-frontend-v2 copy"
 npm install
 ```
 
-### 3. 环境变量配置
-**不要提交你的 `.env` 文件。**
-- `.env` 文件已在 `.gitignore` 中，不会上传到 GitHub
-- 将你的 `.env` 文件放在相应文件夹中：
-  - `YAPBackend copy/.env`
-  - `yap-frontend-v2 copy/.env`
+### 3. Environment Configuration
 
-#### 前端环境变量示例
+Create `.env` files in the respective directories:
+
+#### Backend Environment (`YAPBackend copy/.env`)
 ```env
-# YAP 代币合约地址 (Sei 测试网)
-NEXT_PUBLIC_TOKEN_ADDRESS=0x47423334c145002467a24bA1B41Ac93e2f503cc6
-
-# 后端 API URL
-NEXT_PUBLIC_API_URL=http://localhost:3001
-
-# 其他配置
-NEXT_PUBLIC_APP_NAME=YAP Language Learning
-```
-
-#### 后端环境变量示例
-```env
-# 数据库配置
+# Database Configuration
 DB_USER=postgres
 DB_HOST=localhost
 DB_NAME=yapdb
 DB_PASSWORD=your_password
 DB_PORT=5432
 
-# 区块链配置
-PRIVATE_KEY=your_private_key
-TOKEN_ADDRESS=0x47423334c145002467a24bA1B41Ac93e2f503cc6
-SEI_RPC=https://evm-rpc-testnet.sei-apis.com
+# Blockchain Configuration
+YAP_TOKEN_ADDRESS=0x7873fD9733c68b7d325116D28fAE6ce0A5deE49c
+ETHEREUM_RPC_URL=https://sepolia.infura.io/v3/YOUR_INFURA_KEY
+PRIVATE_KEY=0xYOUR_PRIVATE_KEY
+
+# Azure Speech Services (Optional)
+AZURE_SPEECH_KEY=your_azure_speech_key
 ```
 
-### 4. 运行项目
-#### 后端
-```sh
-cd "YAPBackend copy"
-node index.js
+#### Frontend Environment (`yap-frontend-v2 copy/.env`)
+```env
+# Token Contract Address
+NEXT_PUBLIC_TOKEN_ADDRESS=0x7873fD9733c68b7d325116D28fAE6ce0A5deE49c
+NEXT_PUBLIC_NETWORK_ID=11155111
+
+# Backend API URL
+NEXT_PUBLIC_API_URL=http://localhost:3001
 ```
-#### 前端
-```sh
+
+### 4. Database Setup
+```sql
+-- Create database
+CREATE DATABASE yapdb;
+
+-- Create users table
+CREATE TABLE users (
+    id SERIAL PRIMARY KEY,
+    wallet_address VARCHAR(42) UNIQUE NOT NULL,
+    email VARCHAR(255),
+    name VARCHAR(255),
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+-- Create lessons table
+CREATE TABLE user_lessons (
+    id SERIAL PRIMARY KEY,
+    user_id INTEGER REFERENCES users(id),
+    lesson_id VARCHAR(255) NOT NULL,
+    completed_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    tokens_earned INTEGER DEFAULT 1
+);
+
+-- Create user_stats table
+CREATE TABLE user_stats (
+    id SERIAL PRIMARY KEY,
+    user_id INTEGER REFERENCES users(id),
+    total_lessons INTEGER DEFAULT 0,
+    total_tokens_earned INTEGER DEFAULT 0,
+    total_tokens_spent INTEGER DEFAULT 0,
+    current_streak INTEGER DEFAULT 0,
+    longest_streak INTEGER DEFAULT 0,
+    last_activity_date DATE
+);
+```
+
+### 5. Run the Application
+
+#### Start Backend
+```bash
+cd "YAPBackend copy"
+npm start
+```
+Backend runs on: http://localhost:3001
+
+#### Start Frontend
+```bash
 cd "yap-frontend-v2 copy"
 npm run dev
 ```
-- 前端通常运行在 [http://localhost:3000](http://localhost:3000)
+Frontend runs on: http://localhost:3000
 
 ---
 
-## 使用说明
+## 🪙 Smart Contract Deployment
 
-### 1. 连接 MetaMask 钱包
-1. 确保已安装 MetaMask 浏览器扩展
-2. 点击"连接 MetaMask"按钮
-3. 授权连接并切换到 Sei 测试网
+### Deploy YAP Token Contract
 
-### 2. 学习课程获得代币
-1. 选择并完成课程
-2. 系统自动发送 1 YAP 代币到你的钱包
-3. 在主页查看代币余额
-
-### 3. 使用 AI 对话功能
-1. 确保钱包中有足够的 YAP 代币
-2. 点击"与西班牙语老师对话"
-3. 系统会消费 1 YAP 代币用于 AI 对话
-
----
-
-## Git 使用
-- 你的 `.env` 文件受 `.gitignore` 保护，不会上传
-- 提交和推送更改：
-```sh
-git add .
-git commit -m "你的消息"
-git push
+1. **Navigate to deployment directory**:
+```bash
+cd yap-token-deployment
 ```
-- 如果需要强制推送 (覆盖远程)：
-```sh
-git push -u origin main --force
+
+2. **Install dependencies**:
+```bash
+npm install
 ```
-  **警告：** 这将用你的本地分支覆盖远程分支。
+
+3. **Configure environment** (`.env`):
+```env
+PRIVATE_KEY=0xYOUR_METAMASK_PRIVATE_KEY
+SEPOLIA_RPC_URL=https://sepolia.infura.io/v3/YOUR_INFURA_KEY
+ETHERSCAN_API_KEY=YOUR_ETHERSCAN_API_KEY
+```
+
+4. **Compile contracts**:
+```bash
+npm run compile
+```
+
+5. **Deploy to Sepolia testnet**:
+```bash
+npm run deploy:sepolia
+```
+
+6. **Verify contract** (optional):
+```bash
+npm run verify:sepolia
+```
+
+### Contract Details
+- **Token Name**: YAP Token
+- **Token Symbol**: YAP
+- **Total Supply**: 1,000,000 YAP
+- **Network**: Ethereum Sepolia Testnet
+- **Contract Address**: `0x7873fD9733c68b7d325116D28fAE6ce0A5deE49c`
 
 ---
 
-## 注意事项
-- 如果看到 `Module not found: Can't resolve '@11labs/react'`，在前端安装：
-  ```sh
-  cd "yap-frontend-v2 copy"
-  npm install @11labs/react
-  ```
-- 确保 MetaMask 已安装并配置 Sei 测试网
-- 如有问题，请查看文档或在此仓库中提出 issue
+## 🔗 API Endpoints
+
+### Authentication
+- `POST /api/auth/secure-signup` - User registration
+- `POST /api/auth/login` - User login
+
+### User Management
+- `GET /api/profile/:userId` - Get user profile
+- `GET /api/user-stats/:userId` - Get user statistics
+- `GET /api/user-stats/:userId/streak` - Get user streak
+
+### Lessons & Tokens
+- `POST /api/complete-lesson` - Complete lesson and earn tokens
+- `GET /api/user-lessons/:userId` - Get user's completed lessons
+- `POST /api/redeem-yap` - Consume tokens for AI features
+
+### AI Features
+- `POST /api/pronunciation-assessment` - Assess pronunciation
+- `POST /api/request-spanish-teacher` - Request AI teacher session
+- `GET /api/teacher-session/:userId` - Get teacher session data
 
 ---
 
-## 许可证
-[MIT](LICENSE) 
+## 🎯 Usage Guide
+
+### 1. Connect MetaMask Wallet
+1. Install MetaMask browser extension
+2. Click "Connect MetaMask" button
+3. Authorize connection and switch to Ethereum network
+
+### 2. Complete Lessons to Earn Tokens
+1. Select a lesson from the dashboard
+2. Complete the lesson content
+3. System automatically sends 1 YAP token to your wallet
+4. View your token balance on the dashboard
+
+### 3. Use AI Features (Consume Tokens)
+1. Ensure you have sufficient YAP tokens
+2. Click "Spanish Teacher" feature
+3. System consumes 1 YAP token for AI conversation
+4. Enjoy personalized language learning assistance
+
+### 4. Track Progress
+- View completed lessons in your profile
+- Monitor token earnings and spending
+- Track daily learning streaks
+- Check overall statistics
+
+---
+
+## 🔧 Development
+
+### Frontend Development
+```bash
+cd "yap-frontend-v2 copy"
+npm run dev          # Development server
+npm run build        # Production build
+npm run start        # Production server
+```
+
+### Backend Development
+```bash
+cd "YAPBackend copy"
+npm start            # Start server
+npm run dev          # Development with nodemon
+```
+
+### Smart Contract Development
+```bash
+cd yap-token-deployment
+npm run compile      # Compile contracts
+npm run test         # Run tests
+npm run deploy:local # Deploy to local network
+```
+
+---
+
+## 🛡️ Security Features
+
+- **Environment Variables**: All sensitive data stored in `.env` files
+- **Git Ignore**: `.env` files excluded from version control
+- **Input Validation**: Server-side validation for all API endpoints
+- **Error Handling**: Comprehensive error handling and logging
+- **Secure Transactions**: MetaMask handles all blockchain interactions
+
+---
+
+## 🐛 Troubleshooting
+
+### Common Issues
+
+1. **MetaMask Connection Failed**
+   - Ensure MetaMask is installed and unlocked
+   - Check if you're on the correct network (Ethereum)
+
+2. **Token Balance Not Loading**
+   - Verify the token contract address is correct
+   - Check if you're connected to the right network
+
+3. **Backend Connection Error**
+   - Ensure the backend server is running on port 3001
+   - Check database connection and credentials
+
+4. **Module Not Found Errors**
+   - Run `npm install` in the respective directories
+   - Clear node_modules and reinstall if needed
+
+### Environment Variables Debug
+```bash
+# Check if environment variables are loaded
+cd "YAPBackend copy"
+node -e "console.log(process.env.YAP_TOKEN_ADDRESS)"
+```
+
+---
+
+## 📝 Contributing
+
+1. Fork the repository
+2. Create a feature branch
+3. Make your changes
+4. Test thoroughly
+5. Submit a pull request
+
+---
+
+## 📄 License
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+
+---
+
+## 🙏 Acknowledgments
+
+- **Pond Hackathon** for the opportunity
+- **MetaMask** for wallet integration
+- **Ethereum Foundation** for blockchain infrastructure
+- **OpenZeppelin** for secure smart contract libraries
+
+---
+
+## 📞 Support
+
+For questions or issues:
+- Create an issue in this repository
+- Check the troubleshooting section above
+- Review the API documentation
+
+**Happy Learning with YAP! 🎓✨** 
