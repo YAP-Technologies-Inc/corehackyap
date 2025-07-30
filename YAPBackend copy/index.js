@@ -468,27 +468,84 @@ app.post('/api/assess-pronunciation', upload.single('audio'), async (req, res) =
     console.log('Input file size:', req.file.size, 'bytes');
     console.log('Input file mimetype:', req.file.mimetype);
     
+    // Check if input file exists and has content
+    if (!fs.existsSync(inputPath)) {
+      console.error('❌ Input file does not exist:', inputPath);
+      return res.status(400).json({ error: 'Input file not found' });
+    }
+    
+    const inputStats = fs.statSync(inputPath);
+    console.log('📊 Input file stats:', {
+      size: inputStats.size,
+      created: inputStats.birthtime,
+      modified: inputStats.mtime
+    });
+    
     await new Promise((resolve, reject) => {
+      console.log('🔄 Starting FFmpeg conversion...');
       ffmpeg(inputPath)
         .toFormat('wav')
         .audioChannels(1)
         .audioFrequency(16000)
+        .on('start', (commandLine) => {
+          console.log('🎬 FFmpeg command:', commandLine);
+        })
+        .on('progress', (progress) => {
+          console.log('📈 FFmpeg progress:', progress);
+        })
         .on('end', () => {
-          console.log('FFmpeg conversion completed');
-          console.log('Output file path:', outputPath);
+          console.log('✅ FFmpeg conversion completed');
+          console.log('📁 Output file path:', outputPath);
+          
+          // Check if output file exists and has content
+          if (fs.existsSync(outputPath)) {
+            const outputStats = fs.statSync(outputPath);
+            console.log('📊 Output file stats:', {
+              size: outputStats.size,
+              created: outputStats.birthtime,
+              modified: outputStats.mtime
+            });
+          } else {
+            console.error('❌ Output file does not exist:', outputPath);
+          }
+          
           resolve();
         })
         .on('error', (err) => {
-          console.error('FFmpeg error:', err);
+          console.error('❌ FFmpeg error:', err);
           reject(err);
         })
         .save(outputPath);
     });
 
     // Assess pronunciation
+    console.log('🎤 Starting Azure pronunciation assessment...');
+    console.log('📝 Reference text:', referenceText);
+    console.log('🎵 Audio file:', outputPath);
+    
     const result = await assessPronunciation(outputPath, referenceText);
     
-    // Clean up files
+    console.log('📊 Azure assessment result:', JSON.stringify(result, null, 2));
+    
+    // Save files for inspection (don't delete them)
+    const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
+    const originalFileName = `debug_original_${timestamp}_${req.file.originalname}`;
+    const convertedFileName = `debug_converted_${timestamp}_${req.file.originalname}.wav`;
+    
+    // Copy files to debug folder
+    const debugDir = './uploads/debug';
+    if (!fs.existsSync(debugDir)) {
+      fs.mkdirSync(debugDir, { recursive: true });
+    }
+    
+    fs.copyFileSync(inputPath, `${debugDir}/${originalFileName}`);
+    fs.copyFileSync(outputPath, `${debugDir}/${convertedFileName}`);
+    
+    console.log('🔍 Debug files saved:');
+    console.log('  Original:', `${debugDir}/${originalFileName}`);
+    console.log('  Converted:', `${debugDir}/${convertedFileName}`);
+    
+    // Clean up original files
     fs.unlinkSync(inputPath);
     fs.unlinkSync(outputPath);
 

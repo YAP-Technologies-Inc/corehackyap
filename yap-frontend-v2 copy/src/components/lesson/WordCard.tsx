@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import PronunciationTest from './PronunciationTest';
 
 interface WordCardProps {
   word: {
@@ -15,6 +16,7 @@ interface WordCardProps {
 export default function WordCard({ word, onLearned, isLearned }: WordCardProps) {
   const [showEnglish, setShowEnglish] = useState(false);
   const [isPlaying, setIsPlaying] = useState(false);
+  const [showPronunciation, setShowPronunciation] = useState(false);
 
   const handleLearn = () => {
     if (!isLearned) {
@@ -97,6 +99,23 @@ export default function WordCard({ word, onLearned, isLearned }: WordCardProps) 
         >
           {isLearned ? 'Learned ✓' : 'Mark as Learned'}
         </button>
+        
+        {/* Pronunciation Practice Section */}
+        <div className="mt-6 pt-6 border-t border-gray-200">
+          <button
+            onClick={() => setShowPronunciation(!showPronunciation)}
+            className="text-lg text-purple-600 hover:text-purple-700 transition-colors mb-4"
+          >
+            {showPronunciation ? 'Hide Pronunciation Practice' : '🎤 Practice Pronunciation'}
+          </button>
+          
+          {showPronunciation && (
+            <PronunciationTest
+              referenceText={word.example}
+              spanishWord={word.spanish}
+            />
+          )}
+        </div>
       </div>
     </div>
   );

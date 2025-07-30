@@ -72,14 +72,6 @@ export default function LessonPage() {
         onComplete={handleLessonComplete}
         isCompleting={isCompleting}
       />
-      
-      {/* Pronunciation Test Section */}
-      <div className="container mx-auto px-4 py-8">
-        <PronunciationTest
-          referenceText="Hola, ¿cómo estás?"
-          spanishWord="Hola"
-        />
-      </div>
     </div>
   );
 }

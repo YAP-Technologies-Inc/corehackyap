@@ -30,6 +30,9 @@ export default function LessonUi({ lessonId, onComplete, isCompleting }: LessonU
     ]
   };
 
+  // Total steps is just the number of words
+  const totalSteps = lessonData.words.length;
+
   const handleWordLearned = (word: string) => {
     if (!learnedWords.includes(word)) {
       setLearnedWords([...learnedWords, word]);
@@ -51,7 +54,7 @@ export default function LessonUi({ lessonId, onComplete, isCompleting }: LessonU
   };
 
   const handleNext = () => {
-    if (currentStep < lessonData.words.length - 1) {
+    if (currentStep < totalSteps - 1) {
       setCurrentStep(currentStep + 1);
     } else {
       handleComplete();
@@ -115,12 +118,12 @@ export default function LessonUi({ lessonId, onComplete, isCompleting }: LessonU
         <div className="mt-4">
           <div className="flex justify-between text-sm text-gray-500 mb-1">
             <span>Progress</span>
-            <span>{currentStep + 1} / {lessonData.words.length}</span>
+            <span>{currentStep + 1} / {totalSteps}</span>
           </div>
           <div className="w-full bg-gray-200 rounded-full h-2">
             <div 
               className="bg-blue-500 h-2 rounded-full transition-all duration-300"
-              style={{ width: `${((currentStep + 1) / lessonData.words.length) * 100}%` }}
+              style={{ width: `${((currentStep + 1) / totalSteps) * 100}%` }}
             />
           </div>
         </div>
