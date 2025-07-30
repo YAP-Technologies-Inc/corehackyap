@@ -1,9 +1,7 @@
 'use client';
 
 import React, { useCallback, useEffect, useRef, useState } from 'react';
-import { useConversation } from '@11labs/react';
 import { useRouter } from 'next/navigation';
-import { TablerChevronLeft } from '@/icons'; // Ensure this is properly exported
 
 type Message = {
   id: string;
@@ -15,34 +13,13 @@ type Message = {
 export default function SpanishTeacherConversation() {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [hasAccess, setHasAccess] = useState<boolean | null>(null);
   const [messages, setMessages] = useState<Message[]>([]);
   const [debugInfo, setDebugInfo] = useState<string | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const router = useRouter();
 
-  const ELEVENLABS_API_KEY = 'sk_3d18455ea5f8f28b7a8fe3b8539d1b8ee54f75c8951406af';
-  const AGENT_ID = 'agent_01k0mav3kjfk3s4xbwkka4yg28';
   const API_URL = process.env.NEXT_PUBLIC_API_URL;
-  // const API_URL = "https://api.dev.yapapp.io";
-
   const userId = typeof window !== 'undefined' ? localStorage.getItem('userId') : null;
-
-  const conversation = useConversation({
-    apiKey: ELEVENLABS_API_KEY,
-    agentId: AGENT_ID,
-    onConnect: () => setDebugInfo('Connected to Spanish Teacher'),
-    onDisconnect: () => setDebugInfo('Disconnected from agent'),
-    onMessage: (message) => {
-      if (typeof message.message === 'string') {
-        addMessage(message.message, message.source === 'user' ? 'user' : 'ai');
-      }
-    },
-    onError: (error) => {
-      setError(`Connection error: ${typeof error === 'string' ? error : 'Unknown error'}`);
-      setDebugInfo(`Error details: ${JSON.stringify(error)}`);
-    },
-  });
 
   const addMessage = (text: string, sender: 'user' | 'ai') => {
     setMessages((prev) => [
@@ -51,52 +28,6 @@ export default function SpanishTeacherConversation() {
     ]);
   };
 
-  //TODO: FIX THIS it doesnt log the time and wont route if time expires only when we exit and come back will it then not render this page
-  // const checkAccess = async () => {
-  //   if (!userId) return router.push('/home');
-
-  //   try {
-  //     const res = await fetch(`${API_URL}/api/teacher-session/${userId}`);
-  //     const data = await res.json();
-
-  //     if (data.hasAccess) {
-  //       setHasAccess(true);
-
-  //       if (data.expires_at) {
-  //         const interval = setInterval(() => {
-  //           const timeLeft = new Date(data.expires_at).getTime() - Date.now();
-  //           const mins = Math.floor(timeLeft / 1000 / 60);
-  //           const secs = Math.floor((timeLeft / 1000) % 60);
-
-  //           console.log(`Time left: ${mins}m ${secs}s`);
-
-  //           if (timeLeft <= 5 * 60 * 1000 && timeLeft > 4.9 * 60 * 1000) {
-  //             alert('You have 5 minutes left in your session.');
-  //           }
-
-  //           if (timeLeft <= 0) {
-  //             alert('Session expired. Redirecting...');
-  //             router.push('/home');
-  //           }
-  //         }, 10000);
-
-  //         return () => clearInterval(interval);
-  //       }
-  //     } else {
-  //       setHasAccess(false);
-  //       setTimeout(() => router.push('/home'), 3000);
-  //     }
-  //   } catch (err) {
-  //     console.error('Access check failed:', err);
-  //     setHasAccess(false);
-  //     setTimeout(() => router.push('/home'), 3000);
-  //   }
-  // };
-
-  // useEffect(() => {
-  //   checkAccess();
-  // }, []);
-
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages]);
@@ -104,42 +35,43 @@ export default function SpanishTeacherConversation() {
   const startConversation = useCallback(async () => {
     setIsLoading(true);
     setError(null);
-    setDebugInfo('Requesting mic and starting session...');
+    setDebugInfo('Starting Spanish Teacher session...');
     setMessages([]);
 
     try {
-      await conversation.startSession();
-      setDebugInfo('Session started — waiting for agent...');
+      // Add a welcome message
+      addMessage('¡Hola! Soy tu profesor de español. ¿Cómo estás hoy?', 'ai');
+      setDebugInfo('Session started successfully!');
     } catch (error: any) {
       setError('Failed to start: ' + (error?.message || 'Unknown error'));
     }
 
     setIsLoading(false);
-  }, [conversation]);
+  }, []);
 
   const stopConversation = useCallback(async () => {
     setDebugInfo('Ending session...');
-    await conversation.endSession();
-  }, [conversation]);
+    addMessage('¡Hasta luego! Ha sido un placer ayudarte con tu español.', 'ai');
+  }, []);
 
-  // if (hasAccess === false) {
-  //   return (
-  //     <div className="min-h-screen bg-[#fff8f5] flex items-center justify-center px-4">
-  //       <div className="bg-white border border-red-200 rounded-xl shadow-md p-6 text-center max-w-sm">
-  //         <h2 className="text-xl font-bold text-red-600 mb-2">Access Denied</h2>
-  //         <p className="text-sm text-gray-700">You don't have access. Redirecting…</p>
-  //       </div>
-  //     </div>
-  //   );
-  // }
+  const sendMessage = useCallback(async (text: string) => {
+    if (!text.trim()) return;
 
-  // if (hasAccess === null) {
-  //   return (
-  //     <div className="min-h-screen flex items-center justify-center bg-[#fefbf5]">
-  //       <p className="text-gray-500 text-sm font-medium animate-pulse">Checking access…</p>
-  //     </div>
-  //   );
-  // }
+    // Add user message
+    addMessage(text, 'user');
+
+    // Simulate AI response
+    setTimeout(() => {
+      const responses = [
+        '¡Excelente! Tu pronunciación está mejorando.',
+        '¿Puedes repetir eso más despacio?',
+        'Muy bien, sigues practicando.',
+        '¡Perfecto! Estás progresando mucho.'
+      ];
+      const randomResponse = responses[Math.floor(Math.random() * responses.length)];
+      addMessage(randomResponse, 'ai');
+    }, 1000);
+  }, []);
 
   return (
     <div className="min-h-screen bg-[#f7f3ec] flex flex-col items-center py-10 px-4 relative">
@@ -148,8 +80,7 @@ export default function SpanishTeacherConversation() {
         onClick={() => router.push('/home')}
         className="absolute top-4 left-4 z-10 flex items-center gap-2 text-gray-700 text-sm font-medium"
       >
-        <TablerChevronLeft className="w-5 h-5" />
-        Back
+        ← Back
       </button>
 
       {/* Header */}
@@ -202,26 +133,16 @@ export default function SpanishTeacherConversation() {
         </div>
       </div>
 
-      {/* 🎛 Toggle Button */}
+      {/* Control Button */}
       <div className="w-full max-w-md fixed bottom-6 left-0 right-0 mx-auto flex justify-center px-4">
         <button
-          onClick={
-            conversation.status === 'connected' ? stopConversation : startConversation
-          }
+          onClick={startConversation}
           disabled={isLoading}
-          className={`w-full ${
-            conversation.status === 'connected'
-              ? 'bg-red-500 text-white'
-              : 'bg-[#2D1C1C] text-[#FFD166]'
-          } rounded-full px-6 py-3 font-bold text-base shadow-md transition ${
+          className={`w-full bg-[#2D1C1C] text-[#FFD166] rounded-full px-6 py-3 font-bold text-base shadow-md transition ${
             isLoading ? 'opacity-60 cursor-not-allowed' : 'hover:opacity-90'
           }`}
         >
-          {isLoading
-            ? 'Connecting...'
-            : conversation.status === 'connected'
-            ? 'End Conversation'
-            : 'Start Conversation'}
+          {isLoading ? 'Connecting...' : 'Start Conversation'}
         </button>
       </div>
     </div>

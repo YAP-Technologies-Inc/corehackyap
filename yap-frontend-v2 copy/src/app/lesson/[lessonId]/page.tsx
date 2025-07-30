@@ -7,6 +7,7 @@ import LessonUi from '@/components/lesson/LessonUi';
 import { useMetaMask } from '@/components/wallet/MetaMaskProvider';
 import { useYAPToken } from '@/hooks/useYAPToken';
 import { useToast } from '@/components/ui/ToastProvider';
+import PronunciationTest from '@/components/lesson/PronunciationTest';
 
 export default function LessonPage() {
   const router = useRouter();
@@ -28,7 +29,8 @@ export default function LessonPage() {
 
     try {
       // Call backend API to complete lesson and get token rewards
-      const response = await fetch('/api/complete-lesson', {
+      const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
+      const response = await fetch(`${apiUrl}/api/complete-lesson`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -70,6 +72,14 @@ export default function LessonPage() {
         onComplete={handleLessonComplete}
         isCompleting={isCompleting}
       />
+      
+      {/* Pronunciation Test Section */}
+      <div className="container mx-auto px-4 py-8">
+        <PronunciationTest
+          referenceText="Hola, ¿cómo estás?"
+          spanishWord="Hola"
+        />
+      </div>
     </div>
   );
 }

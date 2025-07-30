@@ -69,14 +69,15 @@ export default function LessonUi({ lessonId, onComplete, isCompleting }: LessonU
   // Add ElevenLabs audio function
   const playElevenLabsAudio = async (text: string) => {
     try {
-      const response = await fetch('/api/elevenlabs-tts', {
+      const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
+      const response = await fetch(`${apiUrl}/api/elevenlabs-tts`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
           text: text,
-          voiceId: 'spanish-voice' // You can customize this
+          voiceId: process.env.NEXT_PUBLIC_ELEVENLABS_VOICE_ID || '2k1RrkiAltTGNFiT6rL1'
         })
       });
       

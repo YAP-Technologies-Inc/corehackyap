@@ -11,14 +11,24 @@ const fs = require('fs');
 const path = require('path');
 // Removed flowglad - not needed for current implementation
 const crypto = require('crypto');
+const { assessPronunciation } = require('./azurePronunciation');
 
 const app = express();
 const PORT = process.env.PORT || 3001;
 
 // Middleware
-app.use(cors());
+app.use(cors({
+  origin: ['http://localhost:3000', 'http://127.0.0.1:3000'],
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization']
+}));
+
 app.use(express.json());
 app.use(express.static('uploads'));
+
+// File upload configuration
+const upload = multer({ dest: 'uploads/' });
 
 // Database configuration
 const db = new pg.Pool({
@@ -291,8 +301,7 @@ app.post('/api/pronunciation-assessment', async (req, res) => {
   }
 });
 
-// File upload for pronunciation assessment
-const upload = multer({ dest: 'uploads/' });
+
 
 app.post('/api/pronunciation-assessment-upload', upload.single('audio'), async (req, res) => {
   try {
@@ -385,7 +394,7 @@ app.get('/api/teacher-session/:userId', async (req, res) => {
 // ElevenLabs TTS endpoint
 app.post('/api/elevenlabs-tts', async (req, res) => {
   try {
-    const { text, voiceId = 'spanish-voice' } = req.body;
+    const { text, voiceId = '2k1RrkiAltTGNFiT6rL1' } = req.body;
     
     if (!text) {
       return res.status(400).json({ error: 'Text is required' });
@@ -424,6 +433,84 @@ app.post('/api/elevenlabs-tts', async (req, res) => {
   } catch (error) {
     console.error('ElevenLabs TTS error:', error);
     res.status(500).json({ error: 'Failed to generate audio' });
+  }
+});
+
+// Pronunciation assessment endpoint
+app.post('/api/assess-pronunciation', upload.single('audio'), async (req, res) => {
+  console.log('🎤 === PRONUNCIATION ASSESSMENT REQUEST RECEIVED ===');
+  console.log('📅 Timestamp:', new Date().toISOString());
+  console.log('🌐 Origin:', req.headers.origin);
+  console.log('📋 Content-Type:', req.headers['content-type']);
+  console.log('📁 File:', req.file ? {
+    fieldname: req.file.fieldname,
+    originalname: req.file.originalname,
+    mimetype: req.file.mimetype,
+    size: req.file.size
+  } : '❌ No file');
+  
+  try {
+    if (!req.file) {
+      console.log('No file provided');
+      return res.status(400).json({ error: 'No audio file provided' });
+    }
+
+    const { referenceText } = req.body;
+    if (!referenceText) {
+      return res.status(400).json({ error: 'Reference text is required' });
+    }
+
+    // Convert audio to WAV format if needed
+    const inputPath = req.file.path;
+    const outputPath = inputPath + '_converted.wav';
+    
+    console.log('Input file path:', inputPath);
+    console.log('Input file size:', req.file.size, 'bytes');
+    console.log('Input file mimetype:', req.file.mimetype);
+    
+    await new Promise((resolve, reject) => {
+      ffmpeg(inputPath)
+        .toFormat('wav')
+        .audioChannels(1)
+        .audioFrequency(16000)
+        .on('end', () => {
+          console.log('FFmpeg conversion completed');
+          console.log('Output file path:', outputPath);
+          resolve();
+        })
+        .on('error', (err) => {
+          console.error('FFmpeg error:', err);
+          reject(err);
+        })
+        .save(outputPath);
+    });
+
+    // Assess pronunciation
+    const result = await assessPronunciation(outputPath, referenceText);
+    
+    // Clean up files
+    fs.unlinkSync(inputPath);
+    fs.unlinkSync(outputPath);
+
+    // Extract scores from Azure response
+    const nbest = result.NBest?.[0];
+    const overallScore = nbest?.PronScore || 0;
+    const accuracyScore = nbest?.AccuracyScore || 0;
+    const fluencyScore = nbest?.FluencyScore || 0;
+    const completenessScore = nbest?.CompletenessScore || 0;
+
+    res.json({
+      success: true,
+      assessment: result,
+      overallScore,
+      accuracyScore,
+      fluencyScore,
+      completenessScore
+    });
+
+  } catch (error) {
+    console.error('Pronunciation assessment error:', error);
+    res.status(500).json({ error: 'Failed to assess pronunciation' });
   }
 });
 

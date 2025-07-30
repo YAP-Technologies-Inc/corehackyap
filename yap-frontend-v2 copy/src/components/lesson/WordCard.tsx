@@ -25,14 +25,15 @@ export default function WordCard({ word, onLearned, isLearned }: WordCardProps) 
   const playElevenLabsAudio = async (text: string) => {
     try {
       setIsPlaying(true);
-      const response = await fetch('/api/elevenlabs-tts', {
+      const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
+      const response = await fetch(`${apiUrl}/api/elevenlabs-tts`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
           text: text,
-          voiceId: 'spanish-voice'
+          voiceId: process.env.NEXT_PUBLIC_ELEVENLABS_VOICE_ID || '2k1RrkiAltTGNFiT6rL1'
         })
       });
       

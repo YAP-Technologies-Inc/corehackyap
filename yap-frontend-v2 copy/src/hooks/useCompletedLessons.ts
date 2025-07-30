@@ -20,7 +20,8 @@ export function useCompletedLessons() {
     const userId = account.slice(2, 10).toLowerCase();
     
     // Fetch completed lessons from backend
-    fetch(`/api/user-lessons/${userId}`)
+    const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
+    fetch(`${apiUrl}/api/user-lessons/${userId}`)
       .then(res => res.json())
       .then(data => {
         setCompletedLessons(data.completedLessons || []);

@@ -22,7 +22,8 @@ export function useUserProfile() {
     const userId = account.slice(2, 10).toLowerCase();
     
     // Fetch user profile from backend
-    fetch(`/api/profile/${userId}`)
+    const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
+    fetch(`${apiUrl}/api/profile/${userId}`)
       .then(res => res.json())
       .then(data => {
         if (data.name) {
