@@ -34,7 +34,7 @@ services:
       - AZURE_SPEECH_KEY=${AZURE_SPEECH_KEY}
       - ELEVENLABS_API_KEY=${ELEVENLABS_API_KEY}
     ports:
-      - "3002:3001"
+      - "3001:3001"
     depends_on:
       - postgres
     volumes:
@@ -51,7 +51,7 @@ services:
     environment:
       - NEXT_PUBLIC_TOKEN_ADDRESS=0x7873fD9733c68b7d325116D28fAE6ce0A5deE49c
       - NEXT_PUBLIC_NETWORK_ID=11155111
-      - NEXT_PUBLIC_API_URL=http://localhost:3002
+      - NEXT_PUBLIC_API_URL=http://localhost:3001
       - NEXT_PUBLIC_ELEVENLABS_VOICE_ID=2k1RrkiAltTGNFiT6rL1
     ports:
       - "3000:3000"
