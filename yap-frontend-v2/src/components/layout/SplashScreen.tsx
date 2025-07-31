@@ -10,7 +10,7 @@ import cardImage from '@/assets/card.png';
 import paperImage from '@/assets/paper.png';
 import animalImage from '@/assets/animal.png';
 import Image from 'next/image';
-import YapIcon from '../layout/YapIcon';
+import YapIcon from './YapIcon';
 
 interface SplashScreenProps {
   onFinish: () => void;

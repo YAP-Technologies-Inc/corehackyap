@@ -5,7 +5,7 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import SplashScreen from "../../components/layout/SplashScreen";
+import SplashScreen from "../layout/SplashScreen";
 import "./SecuringLoader.css";
 
 export default function SecuringLoader() {

@@ -1,0 +1,68 @@
+services:
+  # PostgreSQL Database
+  postgres:
+    image: postgres:15
+    container_name: yap-postgres
+    environment:
+      POSTGRES_DB: yapdb
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: yap_password
+    ports:
+      - "5433:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./init-db.sql:/docker-entrypoint-initdb.d/init-db.sql
+    networks:
+      - yap-network
+
+  # Backend API
+  backend:
+    build:
+      context: ./YAPBackend
+      dockerfile: Dockerfile
+    container_name: yap-backend
+    environment:
+      - DB_USER=postgres
+      - DB_HOST=postgres
+      - DB_NAME=yapdb
+      - DB_PASSWORD=yap_password
+      - DB_PORT=5432
+      - PORT=3001
+      - YAP_TOKEN_ADDRESS=0x7873fD9733c68b7d325116D28fAE6ce0A5deE49c
+      - ETHEREUM_RPC_URL=${ETHEREUM_RPC_URL}
+      - PRIVATE_KEY=${PRIVATE_KEY}
+      - AZURE_SPEECH_KEY=${AZURE_SPEECH_KEY}
+      - ELEVENLABS_API_KEY=${ELEVENLABS_API_KEY}
+    ports:
+      - "3002:3001"
+    depends_on:
+      - postgres
+    volumes:
+      - ./YAPBackend/uploads:/app/uploads
+    networks:
+      - yap-network
+
+  # Frontend Application
+  frontend:
+    build:
+      context: ./yap-frontend-v2
+      dockerfile: Dockerfile
+    container_name: yap-frontend
+    environment:
+      - NEXT_PUBLIC_TOKEN_ADDRESS=0x7873fD9733c68b7d325116D28fAE6ce0A5deE49c
+      - NEXT_PUBLIC_NETWORK_ID=11155111
+      - NEXT_PUBLIC_API_URL=http://localhost:3002
+      - NEXT_PUBLIC_ELEVENLABS_VOICE_ID=2k1RrkiAltTGNFiT6rL1
+    ports:
+      - "3000:3000"
+    depends_on:
+      - backend
+    networks:
+      - yap-network
+
+volumes:
+  postgres_data:
+
+networks:
+  yap-network:
+    driver: bridge 

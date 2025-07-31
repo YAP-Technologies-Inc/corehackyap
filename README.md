@@ -77,7 +77,52 @@ yap-integration-main/
 
 ## 🛠️ Quick Start
 
-### Prerequisites
+### Option 1: Docker Deployment (Recommended)
+
+#### Prerequisites
+- **Docker** and **Docker Compose**
+- **Chrome Browser** (recommended for easy MetaMask integration)
+- **Safari Browser** (supported for audio recording functionality)
+- **MetaMask browser extension**
+- **Infura API key** (for Ethereum RPC)
+- **ElevenLabs API key** (for text-to-speech)
+- **Azure Speech Services key** (for pronunciation assessment)
+
+#### 1. Clone Repository
+```bash
+git clone https://github.com/YAP-Technologies-Inc/pondhackathon.git
+cd pondhackathon
+```
+
+#### 2. Configure Environment
+```bash
+# Copy example environment file
+cp env.example .env
+
+# Edit .env file with your API keys
+nano .env
+```
+
+#### 3. Run with Docker Compose
+```bash
+# Start all services
+docker-compose up -d
+
+# View logs
+docker-compose logs -f
+
+# Stop services
+docker-compose down
+```
+
+#### 4. Access the Application
+- **Frontend**: http://localhost:3000
+- **Backend API**: http://localhost:3001
+- **Database**: localhost:5432
+
+### Option 2: Manual Setup
+
+#### Prerequisites
 - **Node.js 18+** 
 - **Chrome Browser** (recommended for easy MetaMask integration)
 - **Safari Browser** (supported for audio recording functionality)
@@ -166,40 +211,35 @@ NEXT_PUBLIC_ELEVENLABS_VOICE_ID=2k1RrkiAltTGNFiT6rL1
 4. Add the key to `YAPBackend/.env` as `AZURE_SPEECH_KEY`
 
 ### 5. Database Setup
-```sql
--- Create database
-CREATE DATABASE yapdb;
 
+#### Create Database
+```sql
+CREATE DATABASE yapdb;
+```
+
+#### Complete Schema Setup
+Set up the complete database schema in your PostgreSQL database:
+
+```sql
 -- Create users table
 CREATE TABLE users (
-    id SERIAL PRIMARY KEY,
-    wallet_address VARCHAR(42) UNIQUE NOT NULL,
-    email VARCHAR(255),
-    name VARCHAR(255),
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    user_id VARCHAR(42) PRIMARY KEY,
+    wallet_address VARCHAR(42) UNIQUE,
+    name VARCHAR(255)
 );
 
 -- Create lessons table
 CREATE TABLE user_lessons (
     id SERIAL PRIMARY KEY,
-    user_id INTEGER REFERENCES users(id),
+    user_id VARCHAR(42) REFERENCES users(user_id),
     lesson_id VARCHAR(255) NOT NULL,
     completed_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    tokens_earned INTEGER DEFAULT 1
-);
-
--- Create user_stats table
-CREATE TABLE user_stats (
-    id SERIAL PRIMARY KEY,
-    user_id INTEGER REFERENCES users(id),
-    total_lessons INTEGER DEFAULT 0,
-    total_tokens_earned INTEGER DEFAULT 0,
-    total_tokens_spent INTEGER DEFAULT 0,
-    current_streak INTEGER DEFAULT 0,
-    longest_streak INTEGER DEFAULT 0,
-    last_activity_date DATE
+    tokens_earned INTEGER DEFAULT 1,
+    UNIQUE(user_id, lesson_id)
 );
 ```
+
+**Note**: This project uses a simple, static database schema. The tables are designed to be created once with the correct structure from the beginning, ensuring consistency and avoiding migration complexity.
 
 ### 6. Run the Application
 
@@ -220,6 +260,61 @@ Frontend runs on: http://localhost:3000
 **⚠️ Browser Recommendations**: 
 - **Chrome**: Recommended for easy MetaMask integration and overall experience
 - **Safari**: Supported for audio recording functionality, but MetaMask integration may require additional steps
+
+---
+
+## 🐳 Docker Commands
+
+### Development
+```bash
+# Build and start all services
+docker-compose up --build
+
+# Start in background
+docker-compose up -d
+
+# View logs
+docker-compose logs -f
+
+# View specific service logs
+docker-compose logs -f backend
+docker-compose logs -f frontend
+docker-compose logs -f postgres
+```
+
+### Production
+```bash
+# Build production images
+docker-compose -f docker-compose.yml build
+
+# Start production services
+docker-compose -f docker-compose.yml up -d
+
+# Stop all services
+docker-compose down
+
+# Remove volumes (WARNING: This will delete all data)
+docker-compose down -v
+```
+
+### Troubleshooting
+```bash
+# Check service status
+docker-compose ps
+
+# Restart specific service
+docker-compose restart backend
+
+# Rebuild specific service
+docker-compose up --build backend
+
+# Access database
+docker-compose exec postgres psql -U postgres -d yapdb
+
+# View container logs
+docker logs yap-backend
+docker logs yap-frontend
+```
 
 ---
 
