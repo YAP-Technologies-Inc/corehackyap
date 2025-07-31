@@ -2,48 +2,41 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-
+import { useMetaMask } from '@/components/wallet/MetaMaskProvider';
+import { useYAPToken } from '@/hooks/useYAPToken';
+import { useToast } from '@/components/ui/ToastProvider';
 import HeaderGreeting from '@/components/dashboard/HeaderGreeting';
 import BalanceCard from '@/components/dashboard/BalanceCard';
 import DailyStreak from '@/components/dashboard/DailyStreak';
-import BottomNavBar from '@/components/layout/BottomNavBar';
 import LessonCard from '@/components/dashboard/LessonCard';
-import DailyQuizCard from '@/components/dashboard/DailyQuizPrompt';
 import WalletConnect from '@/components/wallet/WalletConnect';
-import allLessons from '@/mock/allLessons';
-
-import { useInitializeUser } from '@/hooks/useUserInitalizer';
-import { useCompletedLessons } from '@/hooks/useCompletedLessons';
-import { useUserProfile } from '@/hooks/useUserProfile';
-import { useUserStats } from '@/hooks/useUserStats';
-import { useYAPToken } from '@/hooks/useYAPToken';
-import { useMetaMask } from '@/components/wallet/MetaMaskProvider';
-import isEqual from 'lodash.isequal';
-import { useToast } from '@/components/ui/ToastProvider';
+import BottomNavBar from '@/components/layout/BottomNavBar';
 import TestingNoticeModal from '@/components/TestingNoticeModal';
+import DailyQuizCard from '@/components/dashboard/DailyQuizPrompt';
+import allLessons from '@/mock/allLessons';
+import { useCompletedLessons } from '@/hooks/useCompletedLessons';
+import { useUserStats } from '@/hooks/useUserStats';
 
 export default function HomePage() {
-  useInitializeUser();
   const router = useRouter();
   const { pushToast } = useToast();
   const { account, isConnected } = useMetaMask();
-  const { balance: yapBalance, consumeYAP } = useYAPToken();
+  const { consumeYAP, getBalance } = useYAPToken();
+  const [lessons, setLessons] = useState<any[]>([]);
+  const [checkingAccess, setCheckingAccess] = useState(false);
 
   // Convert allLessons object to array
-  const lessonsArray = Object.values(allLessons);
-  const [lessons, setLessons] = useState(lessonsArray);
-  const [checkingAccess, setCheckingAccess] = useState(false);
+  const lessonsArray = Object.values(allLessons).map((lesson: any) => ({
+    lesson_id: lesson.id,
+    title: lesson.title,
+    description: lesson.description,
+    status: 'available'
+  }));
 
   const {
     completedLessons,
-    isLoading: isLessonsLoading,
+    isLoading: isCompletedLoading,
   } = useCompletedLessons();
-
-  const {
-    name,
-    language,
-    isLoading: isProfileLoading,
-  } = useUserProfile();
 
   const {
     currentStreak,
@@ -52,6 +45,20 @@ export default function HomePage() {
     isLoading: isStatsLoading,
   } = useUserStats();
 
+  // Refresh balance when page loads
+  useEffect(() => {
+    if (isConnected && account) {
+      // Force a balance refresh when returning to home page
+      setTimeout(async () => {
+        try {
+          await getBalance();
+        } catch (error) {
+          console.error('Error refreshing balance:', error);
+        }
+      }, 1000);
+    }
+  }, [isConnected, account, getBalance]);
+
   // Update lesson completion status
   useEffect(() => {
     const computed = lessonsArray.map((lesson) => ({
@@ -59,7 +66,16 @@ export default function HomePage() {
       status: completedLessons.includes(lesson.lesson_id) ? 'completed' : 'available',
     }));
 
-    if (!isEqual(computed, lessons)) {
+    // Check if the computed lessons are different from current lessons
+    const hasChanged = computed.length !== lessons.length || 
+      computed.some((computedLesson, index) => {
+        const currentLesson = lessons[index];
+        return !currentLesson || 
+          computedLesson.lesson_id !== currentLesson.lesson_id ||
+          computedLesson.status !== currentLesson.status;
+      });
+
+    if (hasChanged) {
       setLessons(computed);
     }
   }, [completedLessons, lessons, lessonsArray]);
@@ -93,7 +109,7 @@ export default function HomePage() {
         <HeaderGreeting />
         
         {/* Wallet Connection */}
-        <div className="mt-4 flex justify-end">
+        <div className="mt-4">
           <WalletConnect />
         </div>
 
@@ -110,12 +126,10 @@ export default function HomePage() {
             {lessons.map((lesson) => (
               <LessonCard
                 key={lesson.lesson_id}
-                lessonId={lesson.lesson_id}
                 id={lesson.lesson_id}
                 title={lesson.title}
                 description={lesson.description}
                 status={lesson.status}
-                onClick={() => router.push(`/lesson/${lesson.lesson_id}`)}
               />
             ))}
           </div>
@@ -141,7 +155,7 @@ export default function HomePage() {
           Daily Quiz
         </h3>
         <div className="mt-2">
-          <DailyQuizCard />
+          <DailyQuizCard isUnlocked={true} />
         </div>
       </div>
       <BottomNavBar />

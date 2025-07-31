@@ -18,6 +18,24 @@ export default function PronunciationTest({ referenceText, spanishWord }: Pronun
 
   const startRecording = async () => {
     try {
+      console.log('🎤 Starting audio recording...');
+      console.log('🌐 Browser:', navigator.userAgent);
+      console.log('📱 User Agent:', navigator.userAgent.includes('Safari') ? 'Safari' : 'Other browser');
+      
+      // Check if MediaRecorder is supported
+      if (!window.MediaRecorder) {
+        console.error('❌ MediaRecorder not supported in this browser');
+        alert('Audio recording is not supported in this browser. Please use Safari for the best experience.');
+        return;
+      }
+      
+      // Check if getUserMedia is supported
+      if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+        console.error('❌ getUserMedia not supported');
+        alert('Microphone access is not supported in this browser. Please use Safari.');
+        return;
+      }
+      
       // Request audio with settings optimized for Azure Speech Services
       const stream = await navigator.mediaDevices.getUserMedia({ 
         audio: {
@@ -25,14 +43,12 @@ export default function PronunciationTest({ referenceText, spanishWord }: Pronun
           channelCount: 1,
           echoCancellation: false,
           noiseSuppression: false,
-          autoGainControl: true,
-          volume: 1.0,
-          latency: 0.01, // Low latency
-          googEchoCancellation: false,
-          googNoiseSuppression: false,
-          googAutoGainControl: true
+          autoGainControl: true
         } 
       });
+      
+      console.log('✅ Microphone access granted');
+      console.log('🎵 Audio tracks:', stream.getAudioTracks().length);
       
       // Try different MIME types in order of preference
       const mimeTypes = [
@@ -47,18 +63,21 @@ export default function PronunciationTest({ referenceText, spanishWord }: Pronun
       for (const type of mimeTypes) {
         if (MediaRecorder.isTypeSupported(type)) {
           mimeType = type;
+          console.log('✅ Supported MIME type:', type);
           break;
+        } else {
+          console.log('❌ Not supported:', type);
         }
       }
       
+      // If no specific MIME type is supported, try with browser default
       if (!mimeType) {
-        console.error('❌ No supported MIME type found');
-        alert('Your browser does not support audio recording. Please try a different browser.');
-        return;
+        console.log('⚠️ No specific MIME type supported, using browser default');
+        mimeType = '';
       }
       
-      console.log('Using MIME type:', mimeType);
-      const mediaRecorder = new MediaRecorder(stream, { mimeType });
+      console.log('🎯 Using MIME type:', mimeType || 'browser default');
+      const mediaRecorder = mimeType ? new MediaRecorder(stream, { mimeType }) : new MediaRecorder(stream);
       
       mediaRecorderRef.current = mediaRecorder;
       audioChunksRef.current = [];
@@ -98,63 +117,96 @@ export default function PronunciationTest({ referenceText, spanishWord }: Pronun
         
         if (totalChunkSize < 5000) {
           console.error('❌ Insufficient audio data collected');
-          alert('Insufficient audio data. Please try recording again.');
+          alert('Not enough audio data recorded. Please try again and speak clearly.');
           return;
         }
         
-        // Test if we can play the audio (optional debugging)
-        const audioUrl = URL.createObjectURL(audioBlob);
-        const testAudio = new Audio(audioUrl);
-        testAudio.onloadedmetadata = () => {
-          console.log('Audio duration:', testAudio.duration, 'seconds');
-          if (testAudio.duration === Infinity || testAudio.duration === NaN) {
-            console.error('❌ Invalid audio duration - audio blob is corrupted');
-            alert('Audio recording failed. Please try again.');
+        // Check for valid audio duration with timeout
+        const audio = new Audio();
+        audio.src = URL.createObjectURL(audioBlob);
+        
+        // Set a timeout for audio loading
+        const audioLoadTimeout = setTimeout(() => {
+          console.error('❌ Audio loading timeout - blob may be corrupted');
+          alert('Audio recording failed. Please try again with Safari browser.');
+        }, 5000); // 5 second timeout
+        
+        audio.onloadedmetadata = () => {
+          clearTimeout(audioLoadTimeout);
+          const duration = audio.duration;
+          console.log('⏱️ Audio duration:', duration, 'seconds');
+          
+          if (duration < 1) {
+            console.error('❌ Audio too short:', duration, 'seconds');
+            alert('Recording too short. Please record for at least 3 seconds.');
             return;
           }
+          
+          if (duration === Infinity || isNaN(duration)) {
+            console.error('❌ Invalid audio duration:', duration);
+            console.log('🔍 Audio blob details:', {
+              size: audioBlob.size,
+              type: audioBlob.type
+            });
+            
+            // Try to proceed anyway if the blob has substantial data
+            if (audioBlob.size > 10000) {
+              console.log('⚠️ Proceeding with assessment despite duration issue - blob has substantial data');
+              assessPronunciation(audioBlob);
+            } else {
+              alert('Audio recording failed. Please try again with Safari browser.');
+            }
+            return;
+          }
+          
+          console.log('✅ Audio validation passed, proceeding with assessment...');
+          assessPronunciation(audioBlob);
         };
-        testAudio.onerror = (error) => {
-          console.error('❌ Audio playback test failed:', error);
-          alert('Audio recording failed. Please try again.');
-          return;
-        };
         
-        await assessPronunciation(audioBlob);
-      };
-
-      // Wait a moment for the audio stream to stabilize
-      await new Promise(resolve => setTimeout(resolve, 100));
-      
-      // Start recording with a shorter timeslice to get more frequent data
-      mediaRecorder.start(100); // Collect data every 100ms for better quality
-      setIsRecording(true);
-      recordingStartTimeRef.current = Date.now();
-        
-        // Add audio level monitoring
-        const audioContext = new AudioContext();
-        const source = audioContext.createMediaStreamSource(stream);
-        const analyser = audioContext.createAnalyser();
-        analyser.fftSize = 256;
-        source.connect(analyser);
-        
-        const dataArray = new Uint8Array(analyser.frequencyBinCount);
-        let audioLevelSum = 0;
-        let audioLevelCount = 0;
-        
-        const checkAudioLevel = () => {
-          if (isRecording) {
-            analyser.getByteFrequencyData(dataArray);
-            const average = dataArray.reduce((a, b) => a + b) / dataArray.length;
-            audioLevelSum += average;
-            audioLevelCount++;
-            setAudioLevel(average);
-            console.log('🎵 Audio level:', average, 'Average:', Math.round(audioLevelSum / audioLevelCount));
-            requestAnimationFrame(checkAudioLevel);
+        audio.onerror = (error) => {
+          clearTimeout(audioLoadTimeout);
+          console.error('❌ Error loading audio for duration check:', error);
+          
+          // Try to proceed anyway if the blob has substantial data
+          if (audioBlob.size > 10000) {
+            console.log('⚠️ Proceeding with assessment despite audio loading error - blob has substantial data');
+            assessPronunciation(audioBlob);
+          } else {
+            alert('Audio recording failed. Please try again with Safari browser.');
           }
         };
-        checkAudioLevel();
+      };
+
+      mediaRecorder.onerror = (event) => {
+        console.error('❌ MediaRecorder error:', event);
+        alert('Audio recording failed. Please try again.');
+      };
+
+      // Start recording
+      mediaRecorder.start(100); // Collect data every 100ms
+      setIsRecording(true);
+      recordingStartTimeRef.current = Date.now();
+      console.log('🎙️ Recording started at:', new Date().toISOString());
+      
+      // Start audio level monitoring
+      startAudioLevelMonitoring(stream);
+      
     } catch (error) {
-      console.error('Error starting recording:', error);
+      console.error('❌ Error starting recording:', error);
+      
+      if (error instanceof Error) {
+        if (error.name === 'NotAllowedError') {
+          alert('Microphone permission denied. Please allow microphone access and try again.');
+        } else if (error.name === 'NotFoundError') {
+          alert('No microphone found. Please connect a microphone and try again.');
+        } else if (error.name === 'NotSupportedError') {
+          alert('Audio recording not supported in this browser. Please use Safari.');
+        } else {
+          alert(`Audio recording failed: ${error.message}. Please try again.`);
+        }
+      } else {
+        alert('Audio recording failed. Please try again.');
+      }
     }
   };
 
@@ -212,11 +264,44 @@ export default function PronunciationTest({ referenceText, spanishWord }: Pronun
     }
   };
 
+  const startAudioLevelMonitoring = (stream: MediaStream) => {
+    const audioContext = new AudioContext();
+    const source = audioContext.createMediaStreamSource(stream);
+    const analyser = audioContext.createAnalyser();
+    analyser.fftSize = 256;
+    source.connect(analyser);
+    
+    const dataArray = new Uint8Array(analyser.frequencyBinCount);
+    let audioLevelSum = 0;
+    let audioLevelCount = 0;
+    
+    const checkAudioLevel = () => {
+      if (isRecording) {
+        analyser.getByteFrequencyData(dataArray);
+        const average = dataArray.reduce((a, b) => a + b) / dataArray.length;
+        audioLevelSum += average;
+        audioLevelCount++;
+        setAudioLevel(average);
+        console.log('🎵 Audio level:', average, 'Average:', Math.round(audioLevelSum / audioLevelCount));
+        requestAnimationFrame(checkAudioLevel);
+      }
+    };
+    checkAudioLevel();
+  };
+
   return (
     <div className="bg-white rounded-lg shadow-lg p-6 max-w-md mx-auto">
       <h3 className="text-xl font-bold text-blue-600 mb-4">
         Practice Pronunciation: {spanishWord}
       </h3>
+      
+      {/* Browser Warning */}
+      {typeof window !== 'undefined' && !navigator.userAgent.includes('Safari') && (
+        <div className="mb-4 p-3 bg-yellow-100 border border-yellow-400 rounded text-yellow-800">
+          <p className="text-sm font-medium">⚠️ Browser Compatibility Notice</p>
+          <p className="text-xs">Audio recording works best with Safari browser. Other browsers may have limited support.</p>
+        </div>
+      )}
       
       <p className="text-gray-600 mb-4">
         Reference: "{referenceText}"

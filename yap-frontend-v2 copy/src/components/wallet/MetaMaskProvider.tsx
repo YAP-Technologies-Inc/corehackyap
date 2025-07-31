@@ -11,7 +11,8 @@ interface MetaMaskContextType {
   signer: ethers.JsonRpcSigner | null;
   connect: () => Promise<void>;
   disconnect: () => void;
-  switchToEthereum: () => Promise<void>;
+  switchToSepolia: () => Promise<void>;
+  forceAccountSelection: () => Promise<void>;
 }
 
 const MetaMaskContext = createContext<MetaMaskContextType | undefined>(undefined);
@@ -106,6 +107,14 @@ export function MetaMaskProvider({ children }: MetaMaskProviderProps) {
     }
 
     try {
+      // First, ensure we're on the correct network (Sepolia)
+      try {
+        await switchToSepolia();
+      } catch (networkError) {
+        console.warn('Could not switch to Sepolia network:', networkError);
+        // Continue anyway, user can manually switch
+      }
+
       const accounts = await window.ethereum.request({
         method: 'eth_requestAccounts',
       });
@@ -127,17 +136,17 @@ export function MetaMaskProvider({ children }: MetaMaskProviderProps) {
     setSigner(null);
   };
 
-  const switchToEthereum = async () => {
+  const switchToSepolia = async () => {
     if (typeof window === 'undefined' || !window.ethereum) {
       alert('Please install MetaMask to use this app');
       return;
     }
 
     try {
-      // Switch to Ethereum mainnet (chainId: 1)
+      // Switch to Sepolia testnet (chainId: 11155111)
       await window.ethereum.request({
         method: 'wallet_switchEthereumChain',
-        params: [{ chainId: '0x1' }], // Ethereum mainnet
+        params: [{ chainId: '0xaa36a7' }], // Sepolia testnet
       });
     } catch (switchError: any) {
       // This error code indicates that the chain has not been added to MetaMask
@@ -147,25 +156,46 @@ export function MetaMaskProvider({ children }: MetaMaskProviderProps) {
             method: 'wallet_addEthereumChain',
             params: [
               {
-                chainId: '0x1',
-                chainName: 'Ethereum',
+                chainId: '0xaa36a7',
+                chainName: 'Sepolia Testnet',
                 nativeCurrency: {
-                  name: 'Ether',
-                  symbol: 'ETH',
+                  name: 'Sepolia Ether',
+                  symbol: 'SEP',
                   decimals: 18,
                 },
-                rpcUrls: ['https://mainnet.infura.io/v3/'],
-                blockExplorerUrls: ['https://etherscan.io'],
+                rpcUrls: ['https://sepolia.infura.io/v3/5286e08a82b14a18a4964abb9283808f'],
+                blockExplorerUrls: ['https://sepolia.etherscan.io'],
               },
             ],
           });
         } catch (addError) {
-          console.error('Error adding Ethereum network:', addError);
-          alert('Failed to add Ethereum network to MetaMask');
+          console.error('Error adding Sepolia network:', addError);
+          alert('Failed to add Sepolia network to MetaMask');
         }
       } else {
-        console.error('Error switching to Ethereum:', switchError);
-        alert('Failed to switch to Ethereum network');
+        console.error('Error switching to Sepolia:', switchError);
+        alert('Failed to switch to Sepolia network');
+      }
+    }
+  };
+
+  const forceAccountSelection = async () => {
+    if (typeof window === 'undefined' || !window.ethereum) {
+      alert('Please install MetaMask to use this app');
+      return;
+    }
+
+    try {
+      const accounts = await window.ethereum.request({
+        method: 'eth_requestAccounts',
+      });
+      await handleAccountsChanged(accounts);
+    } catch (error: any) {
+      if (error.code === 4001) {
+        alert('Please connect your MetaMask wallet');
+      } else {
+        console.error('Error forcing account selection:', error);
+        alert('Error forcing account selection');
       }
     }
   };
@@ -178,7 +208,8 @@ export function MetaMaskProvider({ children }: MetaMaskProviderProps) {
     signer,
     connect,
     disconnect,
-    switchToEthereum,
+    switchToSepolia,
+    forceAccountSelection,
   };
 
   return (

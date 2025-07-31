@@ -30,18 +30,132 @@ app.use(express.static('uploads'));
 // File upload configuration
 const upload = multer({ dest: 'uploads/' });
 
-// Database configuration
-const db = new pg.Pool({
+// Database connection
+const { Pool } = require('pg');
+
+const db = new Pool({
   user: process.env.DB_USER || 'postgres',
   host: process.env.DB_HOST || 'localhost',
-  database: process.env.DB_NAME || 'yap_db',
-  password: process.env.DB_PASSWORD || 'password',
+  database: process.env.DB_NAME || 'yapdb',
+  password: process.env.DB_PASSWORD || 'your_password',
   port: process.env.DB_PORT || 5432,
 });
 
+// Check and migrate database schema (run only once)
+async function checkAndMigrateDatabase() {
+  try {
+    // Check if tokens_earned column exists
+    const checkColumn = await db.query(`
+      SELECT column_name 
+      FROM information_schema.columns 
+      WHERE table_name = 'user_lessons' AND column_name = 'tokens_earned'
+    `);
+    
+    if (checkColumn.rows.length === 0) {
+      console.log('🔄 Adding tokens_earned column to user_lessons table...');
+      await db.query('ALTER TABLE user_lessons ADD COLUMN tokens_earned INTEGER DEFAULT 1');
+      console.log('✅ Database migration completed');
+    } else {
+      console.log('✅ Database schema is up to date');
+    }
+    
+    // Check if wallet_address column exists in users table
+    const checkWalletColumn = await db.query(`
+      SELECT column_name 
+      FROM information_schema.columns 
+      WHERE table_name = 'users' AND column_name = 'wallet_address'
+    `);
+    
+    if (checkWalletColumn.rows.length === 0) {
+      console.log('🔄 Adding wallet_address column to users table...');
+      await db.query('ALTER TABLE users ADD COLUMN wallet_address VARCHAR(42)');
+      console.log('✅ Users table migration completed');
+    } else {
+      console.log('✅ Users table schema is up to date');
+    }
+    
+    // Check if user_id column is set up as SERIAL
+    const checkUserIdColumn = await db.query(`
+      SELECT column_default, is_nullable, data_type
+      FROM information_schema.columns 
+      WHERE table_name = 'users' AND column_name = 'user_id'
+    `);
+    
+    if (checkUserIdColumn.rows.length > 0) {
+      const columnInfo = checkUserIdColumn.rows[0];
+      console.log('🔍 User ID column info:', columnInfo);
+      
+      if (columnInfo.data_type === 'integer' && (!columnInfo.column_default || !columnInfo.column_default.includes('nextval'))) {
+        console.log('🔄 Fixing user_id column to be auto-incrementing...');
+        // Create a sequence for user_id
+        await db.query('CREATE SEQUENCE IF NOT EXISTS users_user_id_seq');
+        // Set the sequence as default for user_id
+        await db.query('ALTER TABLE users ALTER COLUMN user_id SET DEFAULT nextval(\'users_user_id_seq\')');
+        // Set the sequence to start from the current max value
+        await db.query('SELECT setval(\'users_user_id_seq\', COALESCE((SELECT MAX(CAST(user_id AS INTEGER)) FROM users), 0) + 1)');
+        console.log('✅ User ID column migration completed');
+      } else if (columnInfo.data_type === 'text') {
+        console.log('⚠️ User ID column is text type - using simple integer approach');
+        // For text user_id, we'll use a simple approach
+        console.log('✅ User ID column is text type - will handle manually');
+      } else {
+        console.log('✅ User ID column is properly configured');
+      }
+    }
+    
+    // Check if user_lessons.user_id column is integer and needs to be changed to string
+    const checkUserLessonsUserIdColumn = await db.query(`
+      SELECT data_type
+      FROM information_schema.columns 
+      WHERE table_name = 'user_lessons' AND column_name = 'user_id'
+    `);
+    
+    if (checkUserLessonsUserIdColumn.rows.length > 0) {
+      const columnInfo = checkUserLessonsUserIdColumn.rows[0];
+      console.log('🔍 User Lessons User ID column info:', columnInfo);
+      
+      if (columnInfo.data_type === 'integer') {
+        console.log('🔄 Changing user_lessons.user_id from integer to string...');
+        // Change the column type to VARCHAR
+        await db.query('ALTER TABLE user_lessons ALTER COLUMN user_id TYPE VARCHAR(42)');
+        console.log('✅ User Lessons User ID column migration completed');
+      } else {
+        console.log('✅ User Lessons User ID column is already string type');
+      }
+    }
+    
+    // Check if user_lessons.lesson_id column is integer and needs to be changed to string
+    const checkUserLessonsLessonIdColumn = await db.query(`
+      SELECT data_type
+      FROM information_schema.columns 
+      WHERE table_name = 'user_lessons' AND column_name = 'lesson_id'
+    `);
+    
+    if (checkUserLessonsLessonIdColumn.rows.length > 0) {
+      const columnInfo = checkUserLessonsLessonIdColumn.rows[0];
+      console.log('🔍 User Lessons Lesson ID column info:', columnInfo);
+      
+      if (columnInfo.data_type === 'integer') {
+        console.log('🔄 Changing user_lessons.lesson_id from integer to string...');
+        // Change the column type to VARCHAR
+        await db.query('ALTER TABLE user_lessons ALTER COLUMN lesson_id TYPE VARCHAR(255)');
+        console.log('✅ User Lessons Lesson ID column migration completed');
+      } else {
+        console.log('✅ User Lessons Lesson ID column is already string type');
+      }
+    }
+  } catch (error) {
+    console.error('❌ Database migration error:', error);
+    console.log('⚠️ Continuing without migration - some features may not work properly');
+  }
+}
+
+// Run migration on startup (only checks once)
+checkAndMigrateDatabase();
+
 // Ethereum configuration
 const ETHEREUM_RPC_URL = process.env.ETHEREUM_RPC_URL || 'https://mainnet.infura.io/v3/YOUR_INFURA_KEY';
-const YAP_TOKEN_ADDRESS = process.env.YAP_TOKEN_ADDRESS || '0x1234567890123456789012345678901234567890';
+const YAP_TOKEN_ADDRESS = process.env.YAP_TOKEN_ADDRESS || '0x7873fD9733c68b7d325116D28fAE6ce0A5deE49c';
 const PRIVATE_KEY = process.env.PRIVATE_KEY;
 
 // Debug: Log environment variables
@@ -110,6 +224,24 @@ app.post('/api/complete-lesson', async (req, res) => {
     // Send YAP tokens to user
     const txHash = await sendYAPToWallet(walletAddress, 1);
 
+    // First, get or create user ID from wallet address
+    let userResult = await db.query(
+      'SELECT user_id FROM users WHERE wallet_address = $1',
+      [walletAddress]
+    );
+    
+    let userId;
+    if (userResult.rows.length === 0) {
+      // Create new user if doesn't exist - use wallet address as user_id for simplicity
+      const newUserResult = await db.query(
+        'INSERT INTO users (wallet_address, user_id, name) VALUES ($1, $1, $2) RETURNING user_id',
+        [walletAddress, `User_${walletAddress.slice(0, 6)}`]
+      );
+      userId = newUserResult.rows[0].user_id;
+    } else {
+      userId = userResult.rows[0].user_id;
+    }
+    
     // Record lesson completion in database
     const result = await db.query(
       'INSERT INTO user_lessons (user_id, lesson_id, completed_at, tokens_earned) VALUES ($1, $2, NOW(), $3) ON CONFLICT (user_id, lesson_id) DO NOTHING',
@@ -128,14 +260,24 @@ app.post('/api/complete-lesson', async (req, res) => {
   }
 });
 
-// GET /api/user-lessons/:userId
-app.get('/api/user-lessons/:userId', async (req, res) => {
-  const { userId } = req.params;
+// GET /api/user-lessons/:walletAddress
+app.get('/api/user-lessons/:walletAddress', async (req, res) => {
+  const { walletAddress } = req.params;
   
   try {
+    // Get user ID from wallet address
+    const userResult = await db.query(
+      'SELECT user_id FROM users WHERE wallet_address = $1',
+      [walletAddress]
+    );
+    
+    if (userResult.rows.length === 0) {
+      return res.json([]); // No lessons for new user
+    }
+    
     const result = await db.query(
       'SELECT lesson_id, completed_at, tokens_earned FROM user_lessons WHERE user_id = $1 ORDER BY completed_at DESC',
-      [userId]
+      [walletAddress]
     );
     res.json(result.rows);
   } catch (err) {
@@ -144,14 +286,27 @@ app.get('/api/user-lessons/:userId', async (req, res) => {
   }
 });
 
-// GET /api/user-stats/:userId
-app.get('/api/user-stats/:userId', async (req, res) => {
-  const { userId } = req.params;
+// GET /api/user-stats/:walletAddress
+app.get('/api/user-stats/:walletAddress', async (req, res) => {
+  const { walletAddress } = req.params;
   
   try {
+    // Get user ID from wallet address
+    const userResult = await db.query(
+      'SELECT user_id FROM users WHERE wallet_address = $1',
+      [walletAddress]
+    );
+    
+    if (userResult.rows.length === 0) {
+      return res.json({
+        totalLessons: 0,
+        totalTokens: 0
+      });
+    }
+    
     const result = await db.query(
       'SELECT COUNT(*) as total_lessons, SUM(tokens_earned) as total_tokens FROM user_lessons WHERE user_id = $1',
-      [userId]
+      [walletAddress]
     );
     
     const stats = result.rows[0];
@@ -165,14 +320,24 @@ app.get('/api/user-stats/:userId', async (req, res) => {
   }
 });
 
-// POST /api/user-stats/:userId/streak
-app.post('/api/user-stats/:userId/streak', async (req, res) => {
-  const { userId } = req.params;
+// POST /api/user-stats/:walletAddress/streak
+app.post('/api/user-stats/:walletAddress/streak', async (req, res) => {
+  const { walletAddress } = req.params;
   
   try {
+    // Get user ID from wallet address
+    const userResult = await db.query(
+      'SELECT user_id FROM users WHERE wallet_address = $1',
+      [walletAddress]
+    );
+    
+    if (userResult.rows.length === 0) {
+      return res.json({ streak: 0 });
+    }
+    
     const result = await db.query(
       'SELECT COUNT(*) as streak FROM user_lessons WHERE user_id = $1 AND completed_at >= NOW() - INTERVAL \'7 days\'',
-      [userId]
+      [walletAddress]
     );
     
     const streak = parseInt(result.rows[0].streak) || 0;
@@ -183,13 +348,13 @@ app.post('/api/user-stats/:userId/streak', async (req, res) => {
   }
 });
 
-// GET /api/profile/:userId
-app.get('/api/profile/:userId', async (req, res) => {
+// GET /api/profile/:walletAddress
+app.get('/api/profile/:walletAddress', async (req, res) => {
   try {
-    const { userId } = req.params;
+    const { walletAddress } = req.params;
     const result = await db.query(
-      'SELECT name, language_to_learn FROM users WHERE user_id = $1',
-      [userId]
+      'SELECT name, language_to_learn FROM users WHERE wallet_address = $1',
+      [walletAddress]
     );
     if (result.rows.length === 0) {
       return res.status(404).json({ success: false, error: 'User not found' });

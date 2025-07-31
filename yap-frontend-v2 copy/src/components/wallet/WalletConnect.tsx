@@ -3,11 +3,11 @@
 import { useMetaMask } from './MetaMaskProvider';
 
 export default function WalletConnect() {
-  const { account, balance, isConnected, connect, disconnect, switchToEthereum } = useMetaMask();
+  const { account, balance, isConnected, connect, disconnect, switchToSepolia, forceAccountSelection } = useMetaMask();
 
   const handleConnect = async () => {
     try {
-      await switchToEthereum();
+      await switchToSepolia();
       await connect();
     } catch (error) {
       console.error('Error connecting wallet:', error);
@@ -16,6 +16,14 @@ export default function WalletConnect() {
 
   const handleDisconnect = () => {
     disconnect();
+  };
+
+  const handleSwitchAccount = async () => {
+    try {
+      await forceAccountSelection();
+    } catch (error) {
+      console.error('Error switching account:', error);
+    }
   };
 
   if (!isConnected) {
@@ -43,12 +51,20 @@ export default function WalletConnect() {
             Balance: {parseFloat(balance).toFixed(4)} ETH
           </p>
         </div>
-        <button
-          onClick={handleDisconnect}
-          className="bg-red-500 text-white px-4 py-2 rounded-lg text-sm hover:bg-red-600 transition-colors"
-        >
-          Disconnect
-        </button>
+        <div className="flex flex-col gap-2">
+          <button
+            onClick={handleSwitchAccount}
+            className="bg-yellow-500 text-white px-4 py-2 rounded-lg text-sm hover:bg-yellow-600 transition-colors"
+          >
+            Switch Account
+          </button>
+          <button
+            onClick={handleDisconnect}
+            className="bg-red-500 text-white px-4 py-2 rounded-lg text-sm hover:bg-red-600 transition-colors"
+          >
+            Disconnect
+          </button>
+        </div>
       </div>
     </div>
   );

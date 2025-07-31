@@ -44,10 +44,16 @@ export default function LessonPage() {
       if (response.ok) {
         const result = await response.json();
         
-        // Update token balance
-        await getBalance();
+        // Wait for blockchain state to update
+        await new Promise(resolve => setTimeout(resolve, 3000));
         
-        pushToast(`Congratulations! You earned 1 YAP token reward! Transaction hash: ${result.txHash}`, 'success');
+        // Update token balance multiple times to ensure it's fresh
+        await getBalance();
+        setTimeout(async () => {
+          await getBalance();
+        }, 1000);
+        
+        pushToast(`Congratulations! You earned 1 YAP token reward! Transaction hash: ${result.transactionHash}`, 'success');
         
         // Delay redirect to home page
         setTimeout(() => {
