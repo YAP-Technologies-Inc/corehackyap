@@ -1,6 +1,11 @@
 # YAP Token System - Pond Hackathon
 
-A complete Web3 language learning application with token rewards and consumption system built for the Pond Hackathon.
+[![Next.js](https://img.shields.io/badge/Next.js-15-black?style=for-the-badge&logo=next.js)](https://nextjs.org/)
+[![React](https://img.shields.io/badge/React-19-blue?style=for-the-badge&logo=react)](https://reactjs.org/)
+[![Ethereum](https://img.shields.io/badge/Ethereum-Sepolia-orange?style=for-the-badge&logo=ethereum)](https://ethereum.org/)
+[![License](https://img.shields.io/badge/License-MIT-green?style=for-the-badge)](LICENSE)
+
+A complete Web3 language learning application with token rewards and consumption system built for the Pond Hackathon. Earn YAP tokens by completing Spanish lessons and spend them on AI-powered language learning features.
 
 ## 🚀 Features
 
@@ -8,6 +13,7 @@ A complete Web3 language learning application with token rewards and consumption
 - **Token Rewards**: Students earn YAP tokens upon completing lessons
 - **Token Consumption**: AI conversational features consume YAP tokens
 - **Ethereum Integration**: Deployed on Sepolia testnet with smart contracts
+- **Real-time Balance**: Live token balance updates via MetaMask
 
 ### 🔗 MetaMask Wallet Integration
 - Seamless MetaMask wallet connection
@@ -21,6 +27,7 @@ A complete Web3 language learning application with token rewards and consumption
 - Daily learning streaks
 - **Pronunciation assessment with Azure Speech Services**
 - **High-quality text-to-speech with ElevenLabs**
+- **Spanish Teacher AI** - Personalized AI conversation partner
 
 ### 🏗️ Technical Stack
 - **Frontend**: Next.js 15, React 19, TailwindCSS 4
@@ -35,9 +42,14 @@ A complete Web3 language learning application with token rewards and consumption
 
 ```
 yap-integration-main/
-├── yap-frontend-v2 copy/          # Next.js frontend application
+├── yap-frontend-v2/               # Next.js frontend application
 │   ├── src/
 │   │   ├── app/                   # Next.js app router pages
+│   │   │   ├── auth/             # Authentication pages
+│   │   │   ├── home/             # Dashboard page
+│   │   │   ├── lesson/           # Lesson pages
+│   │   │   ├── profile/          # User profile
+│   │   │   └── spanish-teacher/  # AI teacher feature
 │   │   ├── components/            # React components
 │   │   │   ├── auth/             # Authentication components
 │   │   │   ├── dashboard/        # Dashboard components
@@ -46,15 +58,18 @@ yap-integration-main/
 │   │   │   └── ui/               # UI components
 │   │   ├── hooks/                # Custom React hooks
 │   │   ├── context/              # React context providers
+│   │   ├── assets/               # Static assets
+│   │   ├── icons/                # SVG icons
 │   │   └── mock/                 # Mock data
 │   └── public/                   # Static assets
-├── YAPBackend copy/              # Node.js backend server
+├── YAPBackend/                   # Node.js backend server
 │   ├── index.js                  # Main server file
 │   ├── azurePronunciation.js     # Azure Speech Services integration
+│   ├── test-elevenlabs.js        # ElevenLabs testing
 │   └── uploads/                  # File uploads directory
 └── yap-token-deployment/         # Smart contract deployment
     ├── contracts/                # Solidity contracts
-    ├── scripts/                  # Deployment scripts
+    ├── artifacts/                # Compiled contracts
     └── hardhat.config.js         # Hardhat configuration
 ```
 
@@ -64,7 +79,8 @@ yap-integration-main/
 
 ### Prerequisites
 - **Node.js 18+** 
-- **Safari Browser** (required for audio recording functionality)
+- **Chrome Browser** (recommended for easy MetaMask integration)
+- **Safari Browser** (supported for audio recording functionality)
 - **MetaMask browser extension**
 - **PostgreSQL database**
 - **Infura API key** (for Ethereum RPC)
@@ -82,13 +98,19 @@ cd pondhackathon
 
 #### Backend
 ```bash
-cd "YAPBackend copy"
+cd YAPBackend
 npm install
 ```
 
 #### Frontend
 ```bash
-cd "yap-frontend-v2 copy"
+cd yap-frontend-v2
+npm install
+```
+
+#### Smart Contracts
+```bash
+cd yap-token-deployment
 npm install
 ```
 
@@ -96,7 +118,7 @@ npm install
 
 Create `.env` files in the respective directories:
 
-#### Backend Environment (`YAPBackend copy/.env`)
+#### Backend Environment (`YAPBackend/.env`)
 ```env
 # Database Configuration
 DB_USER=postgres
@@ -117,7 +139,7 @@ AZURE_SPEECH_KEY=your_azure_speech_key
 ELEVENLABS_API_KEY=your_elevenlabs_api_key
 ```
 
-#### Frontend Environment (`yap-frontend-v2 copy/.env`)
+#### Frontend Environment (`yap-frontend-v2/.env`)
 ```env
 # Token Contract Address
 NEXT_PUBLIC_TOKEN_ADDRESS=0x7873fD9733c68b7d325116D28fAE6ce0A5deE49c
@@ -135,13 +157,13 @@ NEXT_PUBLIC_ELEVENLABS_VOICE_ID=2k1RrkiAltTGNFiT6rL1
 #### ElevenLabs API Key
 1. Go to [ElevenLabs](https://elevenlabs.io/)
 2. Create an account and get your API key
-3. Add the key to `YAPBackend copy/.env` as `ELEVENLABS_API_KEY`
+3. Add the key to `YAPBackend/.env` as `ELEVENLABS_API_KEY`
 
 #### Azure Speech Services Key
 1. Go to [Azure Portal](https://portal.azure.com/)
 2. Create a Speech Service resource
 3. Get your subscription key and region
-4. Add the key to `YAPBackend copy/.env` as `AZURE_SPEECH_KEY`
+4. Add the key to `YAPBackend/.env` as `AZURE_SPEECH_KEY`
 
 ### 5. Database Setup
 ```sql
@@ -183,19 +205,21 @@ CREATE TABLE user_stats (
 
 #### Start Backend
 ```bash
-cd "YAPBackend copy"
+cd YAPBackend
 npm start
 ```
 Backend runs on: http://localhost:3001
 
 #### Start Frontend
 ```bash
-cd "yap-frontend-v2 copy"
+cd yap-frontend-v2
 npm run dev
 ```
 Frontend runs on: http://localhost:3000
 
-**⚠️ Important**: Use **Safari browser** for the best audio recording experience. The pronunciation assessment feature works best with Safari's MediaRecorder API.
+**⚠️ Browser Recommendations**: 
+- **Chrome**: Recommended for easy MetaMask integration and overall experience
+- **Safari**: Supported for audio recording functionality, but MetaMask integration may require additional steps
 
 ---
 
@@ -288,7 +312,7 @@ npm run verify:sepolia
 4. Enjoy personalized language learning assistance
 
 ### 4. Pronunciation Practice
-1. **Use Safari browser** for best audio recording experience
+1. **Use Chrome or Safari browser** for audio recording experience
 2. Click "Listen" button to hear Spanish words
 3. Click "Practice Pronunciation" to record your speech
 4. Get instant feedback on your pronunciation accuracy
@@ -305,7 +329,7 @@ npm run verify:sepolia
 
 ### Frontend Development
 ```bash
-cd "yap-frontend-v2 copy"
+cd yap-frontend-v2
 npm run dev          # Development server
 npm run build        # Production build
 npm run start        # Production server
@@ -313,7 +337,7 @@ npm run start        # Production server
 
 ### Backend Development
 ```bash
-cd "YAPBackend copy"
+cd YAPBackend
 npm start            # Start server
 npm run dev          # Development with nodemon
 ```
@@ -343,7 +367,7 @@ npm run deploy:local # Deploy to local network
 ### Common Issues
 
 1. **Audio Recording Not Working**
-   - **Use Safari browser** - Chrome/Firefox have limited MediaRecorder support
+   - **Use Chrome or Safari browser** - Both support MediaRecorder API
    - Ensure microphone permissions are granted
    - Check if ElevenLabs API key is configured correctly
 
@@ -376,13 +400,13 @@ npm run deploy:local # Deploy to local network
 ### Environment Variables Debug
 ```bash
 # Check if environment variables are loaded
-cd "YAPBackend copy"
+cd YAPBackend
 node -e "console.log('ElevenLabs Key:', process.env.ELEVENLABS_API_KEY ? 'Set' : 'Missing')"
 node -e "console.log('Azure Key:', process.env.AZURE_SPEECH_KEY ? 'Set' : 'Missing')"
 ```
 
 ### Audio Debug
-- Check `YAPBackend copy/uploads/debug/` for saved audio files
+- Check `YAPBackend/uploads/debug/` for saved audio files
 - Review browser console for MediaRecorder errors
 - Test microphone permissions in browser settings
 
