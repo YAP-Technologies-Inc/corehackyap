@@ -410,22 +410,41 @@ app.post('/api/pronunciation-assessment-upload', upload.single('audio'), async (
 // Spanish Teacher AI Session
 app.post('/api/request-spanish-teacher', async (req, res) => {
   try {
-    const { userId, message } = req.body;
+    const { userId, message, agentId } = req.body;
     
-    // Mock AI response
-    const responses = [
-      "¡Hola! ¿Cómo estás hoy?",
-      "Me alegro de verte. ¿Qué te gustaría practicar?",
-      "Excelente pregunta. Te ayudo con eso.",
-      "¡Muy bien! Sigamos practicando."
-    ];
+    console.log('Spanish Teacher Request:', { userId, message, agentId });
+    
+    // Mock AI response based on agent ID
+    let responses;
+    if (agentId === 'agent_01k0mav3kjfk3s4xbwkka4yg28') {
+      // Lyndsay agent responses
+      responses = [
+        "¡Hola! Soy Lyndsay, tu profesora de español. ¿Cómo estás hoy?",
+        "Me alegro de verte. ¿Qué te gustaría practicar hoy?",
+        "Excelente pregunta. Te ayudo con eso.",
+        "¡Muy bien! Sigamos practicando juntos.",
+        "Perfecto, estás progresando mucho.",
+        "¿Te gustaría practicar vocabulario o gramática?",
+        "¡Excelente pronunciación! Sigamos así.",
+        "Entiendo lo que dices. ¿Puedes explicarlo de otra manera?"
+      ];
+    } else {
+      // Default responses
+      responses = [
+        "¡Hola! ¿Cómo estás hoy?",
+        "Me alegro de verte. ¿Qué te gustaría practicar?",
+        "Excelente pregunta. Te ayudo con eso.",
+        "¡Muy bien! Sigamos practicando."
+      ];
+    }
     
     const response = responses[Math.floor(Math.random() * responses.length)];
     
     res.json({
       success: true,
       response,
-      sessionId: `session_${Date.now()}`
+      sessionId: `session_${Date.now()}`,
+      agentId: agentId || 'default'
     });
   } catch (error) {
     console.error('Spanish teacher error:', error);
@@ -503,6 +522,96 @@ app.post('/api/elevenlabs-tts', async (req, res) => {
   } catch (error) {
     console.error('ElevenLabs TTS error:', error);
     res.status(500).json({ error: 'Failed to generate audio' });
+  }
+});
+
+// ElevenLabs ConvAI endpoint for Lyndsay agent
+app.get('/api/lyndsay-agent', async (req, res) => {
+  try {
+    console.log('🎤 === LYNDSAY AGENT REQUEST RECEIVED ===');
+    
+    // Read API key from environment variables
+    const apiKey = process.env.ELEVENLABS_API_KEY;
+    if (!apiKey) {
+      console.error('API key not found in environment variables');
+      return res.status(500).json({
+        error: 'API key not found in environment variables',
+        success: false
+      });
+    }
+
+    // Define the Lyndsay agent ID
+    const lyndsayAgentId = 'agent_01k0mav3kjfk3s4xbwkka4yg28';
+    
+    // Get the specific voice ID to use
+    const voiceId = process.env.LYNDSAY_VOICE_ID || '2k1RrkiAltTGNFiT6rL1';
+    
+    console.log(`Using Lyndsay agent ID: ${lyndsayAgentId} and voice ID: ${voiceId}`);
+
+    // For authenticated agents, get a signed URL
+    console.log('Fetching signed URL for Lyndsay agent from ElevenLabs API');
+    
+    // Voice stability parameters
+    const queryParams = new URLSearchParams({
+      agent_id: lyndsayAgentId,
+      voice_id: voiceId,
+      stability: '0.80',
+      similarity_boost: '0.80',
+      consistency: 'high'
+    }).toString();
+
+    const response = await fetch(
+      `https://api.elevenlabs.io/v1/convai/conversation/get_signed_url?${queryParams}`,
+      {
+        method: 'GET',
+        headers: {
+          'xi-api-key': apiKey,
+          'Content-Type': 'application/json',
+          'xi-voice-settings': JSON.stringify({
+            stability: 0.80,
+            similarity_boost: 0.80,
+            use_speaker_boost: true
+          })
+        }
+      }
+    );
+
+    if (!response.ok) {
+      console.error('ElevenLabs API error:', {
+        status: response.status,
+        statusText: response.statusText
+      });
+      return res.status(response.status).json({
+        error: `Failed to fetch signed URL: ${response.statusText}`,
+        statusCode: response.status,
+        success: false
+      });
+    }
+
+    const data = await response.json();
+    
+    if (!data || !data.signed_url) {
+      console.error('No signed URL returned from ElevenLabs API');
+      return res.status(500).json({
+        error: 'No signed URL returned from API',
+        success: false
+      });
+    }
+
+    console.log('Successfully obtained signed URL for Lyndsay agent');
+    
+    return res.json({
+      signedUrl: data.signed_url,
+      success: true
+    });
+    
+  } catch (error) {
+    console.error('General error:', error);
+    return res.status(500).json({
+      error: 'Internal server error',
+      details: error instanceof Error ? error.message : String(error),
+      success: false
+    });
   }
 });
 
