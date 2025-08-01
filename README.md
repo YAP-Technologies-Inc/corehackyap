@@ -199,16 +199,65 @@ NEXT_PUBLIC_ELEVENLABS_VOICE_ID=2k1RrkiAltTGNFiT6rL1
 
 ### 4. API Keys Setup
 
-#### ElevenLabs API Key
-1. Go to [ElevenLabs](https://elevenlabs.io/)
-2. Create an account and get your API key
-3. Add the key to `YAPBackend/.env` as `ELEVENLABS_API_KEY`
+## 🌐 Testnet Resources
 
-#### Azure Speech Services Key
-1. Go to [Azure Portal](https://portal.azure.com/)
-2. Create a Speech Service resource
-3. Get your subscription key and region
-4. Add the key to `YAPBackend/.env` as `AZURE_SPEECH_KEY`
+### Free Testnet Faucets
+
+#### Ethereum Sepolia Testnet
+- **Primary Faucet**: https://sepoliafaucet.com/
+- **Alternative 1**: https://faucet.sepolia.dev/
+- **Alternative 2**: https://sepolia-faucet.pk910.de/
+
+#### Polygon Mumbai Testnet
+- **Official Faucet**: https://faucet.polygon.technology/
+- **Alternative**: https://mumbaifaucet.com/
+
+#### Binance Smart Chain Testnet
+- **Official Faucet**: https://testnet.binance.org/faucet-smart
+
+### Testnet Configuration
+
+#### Sepolia (Ethereum)
+```
+Network Name: Sepolia
+RPC URL: https://sepolia.infura.io/v3/YOUR_KEY
+Chain ID: 11155111
+Currency Symbol: ETH
+Block Explorer: https://sepolia.etherscan.io/
+```
+
+#### Mumbai (Polygon)
+```
+Network Name: Mumbai
+RPC URL: https://rpc-mumbai.maticvigil.com
+Chain ID: 80001
+Currency Symbol: MATIC
+Block Explorer: https://mumbai.polygonscan.com/
+```
+
+#### BSC Testnet
+```
+Network Name: BSC Testnet
+RPC URL: https://data-seed-prebsc-1-s1.binance.org:8545/
+Chain ID: 97
+Currency Symbol: tBNB
+Block Explorer: https://testnet.bscscan.com/
+```
+
+### How to Get Testnet Tokens
+
+1. **Connect MetaMask** to your browser
+2. **Switch to the desired testnet** (Sepolia recommended)
+3. **Visit a faucet website** from the list above
+4. **Enter your wallet address**
+5. **Wait for tokens** to arrive (usually within minutes)
+
+### ⚠️ Important Notes
+- Testnet tokens have **no real value**
+- They are **only for development and testing**
+- **Never send testnet tokens to mainnet addresses**
+- Faucets may have daily limits
+- Keep your testnet tokens for development purposes
 
 ### 5. Database Setup
 
