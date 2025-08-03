@@ -7,7 +7,22 @@
 
 A complete Web3 language learning application with token rewards and consumption system built for the Core Connect Global Buildathon. Earn YAP tokens by completing Spanish lessons and spend them on AI-powered language learning features. Now deployed on Core Blockchain!
 
-YAP has also submitted to cryptopond's hackathon for executing smart contracts on ethereum.
+## 🎯 **Quick Setup Guide**
+
+**🚀 Ready to Run in 4 Steps:**
+```bash
+git clone https://github.com/YAP-Technologies-Inc/corehackyap.git
+cd corehackyap/hackathon
+cp env.example .env
+# Edit .env with your API keys (see below)
+docker-compose up --build -d
+```
+
+**✅ What You Get:**
+- Pre-configured Core Blockchain testnet connection
+- Deployed YAP Token contract ready to use: `0x4853BA7b0b02F0AE5A3D540A2B9E79CE70C45a66`
+- Complete database setup
+- Full stack application
 
 ## 🚀 Features
 
