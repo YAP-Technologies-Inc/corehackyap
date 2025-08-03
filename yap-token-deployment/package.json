@@ -1,22 +1,33 @@
 {
   "name": "yap-token-deployment",
   "version": "1.0.0",
-  "description": "YAP Token deployment scripts",
-  "main": "index.js",
+  "description": "YAP Token deployment scripts for Core Blockchain",
+  "main": "deploy.js",
   "scripts": {
     "compile": "hardhat compile",
+    "test": "hardhat test",
+    "setup:coreTestnet": "node scripts/setup-core-testnet.js",
+    "get:tokens": "node scripts/get-testnet-tokens.js",
+    "verify:testnet": "node scripts/verify-testnet-setup.js",
+    "deploy:core": "hardhat run deploy.js --network core",
+    "deploy:coreTestnet": "hardhat run deploy.js --network coreTestnet",
+    "verify:core": "hardhat verify --network core",
+    "verify:coreTestnet": "hardhat verify --network coreTestnet",
     "deploy:mainnet": "hardhat run deploy.js --network mainnet",
-    "deploy:goerli": "hardhat run deploy.js --network goerli",
     "deploy:sepolia": "hardhat run deploy.js --network sepolia",
     "verify:mainnet": "hardhat verify --network mainnet",
+    "verify:sepolia": "hardhat verify --network sepolia",
+    "deploy:goerli": "hardhat run deploy.js --network goerli",
     "verify:goerli": "hardhat verify --network goerli",
-    "verify:sepolia": "hardhat verify --network sepolia"
+    "console:coreTestnet": "hardhat console --network coreTestnet",
+    "console:core": "hardhat console --network core"
   },
   "dependencies": {
-    "@openzeppelin/contracts": "^5.0.0",
-    "hardhat": "^2.19.0",
     "@nomicfoundation/hardhat-toolbox": "^4.0.0",
-    "dotenv": "^16.3.1"
+    "@openzeppelin/contracts": "^4.9.6",
+    "dotenv": "^16.0.0",
+    "hardhat": "^2.19.0",
+    "node-fetch": "^2.7.0"
   },
   "devDependencies": {
     "@nomicfoundation/hardhat-verify": "^2.0.0"

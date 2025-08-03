@@ -1,25 +1,26 @@
-# YAP Token System - Pond Hackathon
+# YAP Token System - Core Connect Global Buildathon
 
 [![Next.js](https://img.shields.io/badge/Next.js-15-black?style=for-the-badge&logo=next.js)](https://nextjs.org/)
 [![React](https://img.shields.io/badge/React-19-blue?style=for-the-badge&logo=react)](https://reactjs.org/)
-[![Ethereum](https://img.shields.io/badge/Ethereum-Sepolia-orange?style=for-the-badge&logo=ethereum)](https://ethereum.org/)
+[![Core Blockchain](https://img.shields.io/badge/Core-Blockchain-orange?style=for-the-badge&logo=blockchain)](https://coredao.org/)
 [![License](https://img.shields.io/badge/License-MIT-green?style=for-the-badge)](LICENSE)
 
-A complete Web3 language learning application with token rewards and consumption system built for the Pond Hackathon. Earn YAP tokens by completing Spanish lessons and spend them on AI-powered language learning features.
+A complete Web3 language learning application with token rewards and consumption system built for the Core Connect Global Buildathon. Earn YAP tokens by completing Spanish lessons and spend them on AI-powered language learning features. Now deployed on Core Blockchain!
 
 ## 🚀 Features
 
 ### 🪙 YAP Token System
 - **Token Rewards**: Students earn YAP tokens upon completing lessons
 - **Token Consumption**: AI conversational features consume YAP tokens
-- **Ethereum Integration**: Deployed on Sepolia testnet with smart contracts
+- **Core Blockchain Integration**: Deployed on Core Testnet2 with smart contracts
 - **Real-time Balance**: Live token balance updates via MetaMask
+- **Free Testnet Tokens**: Get tCORE2 from https://scan.test2.btcs.network/faucet
 
 ### 🔗 MetaMask Wallet Integration
 - Seamless MetaMask wallet connection
-- Automatic network switching to Ethereum
-- Real-time token and ETH balance display
-- Secure transaction handling
+- Automatic network switching to Core Blockchain
+- Real-time YAP token and CORE balance display
+- Secure transaction handling on Core network
 
 ### 🎓 Language Learning Platform
 - Spanish language lessons with interactive content
@@ -32,9 +33,10 @@ A complete Web3 language learning application with token rewards and consumption
 ### 🏗️ Technical Stack
 - **Frontend**: Next.js 15, React 19, TailwindCSS 4
 - **Backend**: Node.js, Express, PostgreSQL
-- **Blockchain**: Ethereum Sepolia testnet, ethers.js
+- **Blockchain**: Core Blockchain Testnet2, ethers.js
 - **Smart Contracts**: Solidity, Hardhat deployment
 - **AI Services**: Azure Speech Services, ElevenLabs TTS
+- **Network**: Core Testnet2 (Chain ID: 1114)
 
 ---
 
@@ -172,10 +174,11 @@ DB_NAME=yapdb
 DB_PASSWORD=your_password
 DB_PORT=5432
 
-# Blockchain Configuration
-YAP_TOKEN_ADDRESS=0x7873fD9733c68b7d325116D28fAE6ce0A5deE49c
-ETHEREUM_RPC_URL=https://sepolia.infura.io/v3/YOUR_INFURA_KEY
-PRIVATE_KEY=0xYOUR_PRIVATE_KEY
+# Core Blockchain Configuration
+YAP_TOKEN_ADDRESS=0x4853BA7b0b02F0AE5A3D540A2B9E79CE70C45a66
+CORE_TESTNET_RPC_URL=https://rpc.test2.btcs.network
+PRIVATE_KEY=your_private_key_without_0x
+NETWORK=coreTestnet
 
 # Azure Speech Services (Required for pronunciation assessment)
 AZURE_SPEECH_KEY=your_azure_speech_key
@@ -184,11 +187,11 @@ AZURE_SPEECH_KEY=your_azure_speech_key
 ELEVENLABS_API_KEY=your_elevenlabs_api_key
 ```
 
-#### Frontend Environment (`yap-frontend-v2/.env`)
+#### Frontend Environment (`yap-frontend-v2/.env.local`)
 ```env
-# Token Contract Address
-NEXT_PUBLIC_TOKEN_ADDRESS=0x7873fD9733c68b7d325116D28fAE6ce0A5deE49c
-NEXT_PUBLIC_NETWORK_ID=11155111
+# Core Blockchain Token Contract Address
+NEXT_PUBLIC_TOKEN_ADDRESS=0x4853BA7b0b02F0AE5A3D540A2B9E79CE70C45a66
+NEXT_PUBLIC_NETWORK_ID=1114
 
 # Backend API URL
 NEXT_PUBLIC_API_URL=http://localhost:3001
@@ -203,6 +206,12 @@ NEXT_PUBLIC_ELEVENLABS_VOICE_ID=2k1RrkiAltTGNFiT6rL1
 
 ### Free Testnet Faucets
 
+#### Core Blockchain Testnet2 (Current)
+- **Official Faucet**: https://scan.test2.btcs.network/faucet
+- **Token**: tCORE2 (for gas fees)
+- **Chain ID**: 1114
+- **Network**: Core Blockchain Testnet2
+
 #### Ethereum Sepolia Testnet
 - **Primary Faucet**: https://sepoliafaucet.com/
 - **Alternative 1**: https://faucet.sepolia.dev/
@@ -216,6 +225,16 @@ NEXT_PUBLIC_ELEVENLABS_VOICE_ID=2k1RrkiAltTGNFiT6rL1
 - **Official Faucet**: https://testnet.binance.org/faucet-smart
 
 ### Testnet Configuration
+
+#### Core Blockchain Testnet2 (Current Deployment)
+```
+Network Name: Core Blockchain Testnet2
+RPC URL: https://rpc.test2.btcs.network
+Chain ID: 1114
+Currency Symbol: tCORE2
+Block Explorer: https://scan.test2.btcs.network/
+Faucet: https://scan.test2.btcs.network/faucet
+```
 
 #### Sepolia (Ethereum)
 ```
@@ -383,32 +402,52 @@ npm install
 
 3. **Configure environment** (`.env`):
 ```env
-PRIVATE_KEY=0xYOUR_METAMASK_PRIVATE_KEY
-SEPOLIA_RPC_URL=https://sepolia.infura.io/v3/YOUR_INFURA_KEY
-ETHERSCAN_API_KEY=YOUR_ETHERSCAN_API_KEY
+PRIVATE_KEY=your_metamask_private_key_without_0x
+CORE_TESTNET_RPC_URL=https://rpc.test2.btcs.network
+NETWORK=coreTestnet
 ```
 
-4. **Compile contracts**:
+4. **Get testnet tokens**:
+Visit https://scan.test2.btcs.network/faucet to get free tCORE2 tokens for gas fees.
+
+5. **Compile contracts**:
 ```bash
 npm run compile
 ```
 
-5. **Deploy to Sepolia testnet**:
+6. **Deploy to Core Testnet2**:
 ```bash
-npm run deploy:sepolia
+npm run deploy:coreTestnet
 ```
 
-6. **Verify contract** (optional):
+7. **Verify testnet setup**:
 ```bash
-npm run verify:sepolia
+npm run verify:testnet
 ```
 
-### Contract Details
+### Contract Details (Current Deployment)
 - **Token Name**: YAP Token
 - **Token Symbol**: YAP
 - **Total Supply**: 1,000,000 YAP
-- **Network**: Ethereum Sepolia Testnet
-- **Contract Address**: `0x7873fD9733c68b7d325116D28fAE6ce0A5deE49c`
+- **Network**: Core Blockchain Testnet2
+- **Chain ID**: 1114
+- **Contract Address**: `0x4853BA7b0b02F0AE5A3D540A2B9E79CE70C45a66`
+- **Block Explorer**: [View Contract](https://scan.test2.btcs.network/address/0x4853BA7b0b02F0AE5A3D540A2B9E79CE70C45a66)
+- **Faucet**: https://scan.test2.btcs.network/faucet
+
+### Testing Token Functions
+```bash
+cd ../YAPBackend
+
+# Transfer tokens
+NETWORK=coreTestnet node transfer-tokens.js transfer
+
+# Mint tokens (owner only)
+NETWORK=coreTestnet node transfer-tokens.js mint <address> <amount>
+
+# Burn tokens
+NETWORK=coreTestnet node transfer-tokens.js burn <amount>
+```
 
 ---
 
@@ -527,7 +566,8 @@ npm run deploy:local # Deploy to local network
 
 4. **MetaMask Connection Failed**
    - Ensure MetaMask is installed and unlocked
-   - Check if you're on the correct network (Ethereum)
+   - Check if you're on the correct network (Core Testnet2 - Chain ID: 1114)
+   - Add Core Testnet2 to MetaMask if needed
 
 5. **Token Balance Not Loading**
    - Verify the token contract address is correct
@@ -574,12 +614,13 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ## 🙏 Acknowledgments
 
-- **Pond Hackathon** for the opportunity
+- **Core Connect Global Buildathon** for the opportunity
+- **Core Foundation** for Core Blockchain infrastructure
 - **MetaMask** for wallet integration
-- **Ethereum Foundation** for blockchain infrastructure
 - **OpenZeppelin** for secure smart contract libraries
 - **ElevenLabs** for high-quality text-to-speech
 - **Azure Speech Services** for pronunciation assessment
+- **Core Testnet Faucet** (https://scan.test2.btcs.network/faucet) for free test tokens
 
 ---
 

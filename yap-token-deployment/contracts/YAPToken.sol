@@ -1,11 +1,11 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.8.20;
+pragma solidity ^0.8.0;
 
 import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 
 contract YAPToken is ERC20, Ownable {
-    constructor() ERC20("YAP Token", "YAP") Ownable(msg.sender) {
+    constructor() ERC20("YAP Token", "YAP") {
         // Mint initial supply to deployer
         _mint(msg.sender, 1000000 * 10 ** decimals()); // 1 million YAP tokens
     }

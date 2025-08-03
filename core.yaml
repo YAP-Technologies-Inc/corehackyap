@@ -1,0 +1,99 @@
+version: "1.0"
+name: "yap-project"
+
+# 定义项目组件
+components:
+  frontend:
+    type: "web"
+    source: "./yap-frontend-v2"
+    build:
+      command: "npm run build"
+      output: ".next"
+    serve:
+      command: "npm start"
+      port: 3000
+    environment:
+      - NEXT_PUBLIC_TOKEN_ADDRESS=0x7873fD9733c68b7d325116D28fAE6ce0A5deE49c
+      - NEXT_PUBLIC_NETWORK_ID=11155111
+      - NEXT_PUBLIC_API_URL=http://localhost:3001
+      - NEXT_PUBLIC_ELEVENLABS_VOICE_ID=2k1RrkiAltTGNFiT6rL1
+
+  backend:
+    type: "api"
+    source: "./YAPBackend"
+    build:
+      command: "npm install"
+    serve:
+      command: "npm start"
+      port: 3001
+    environment:
+      - DB_USER=postgres
+      - DB_HOST=postgres
+      - DB_NAME=yapdb
+      - DB_PASSWORD=yap_password
+      - DB_PORT=5432
+      - PORT=3001
+      - YAP_TOKEN_ADDRESS=0x7873fD9733c68b7d325116D28fAE6ce0A5deE49c
+
+  database:
+    type: "database"
+    image: "postgres:15"
+    environment:
+      - POSTGRES_DB=yapdb
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=yap_password
+    ports:
+      - "5433:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./init-db.sql:/docker-entrypoint-initdb.d/init-db.sql
+
+# 定义部署流程
+workflows:
+  deploy:
+    steps:
+      - name: "build-frontend"
+        component: "frontend"
+        action: "build"
+      
+      - name: "build-backend"
+        component: "backend"
+        action: "build"
+      
+      - name: "start-database"
+        component: "database"
+        action: "start"
+      
+      - name: "start-backend"
+        component: "backend"
+        action: "start"
+        depends_on: ["start-database"]
+      
+      - name: "start-frontend"
+        component: "frontend"
+        action: "start"
+        depends_on: ["start-backend"]
+
+  dev:
+    steps:
+      - name: "start-database"
+        component: "database"
+        action: "start"
+      
+      - name: "dev-backend"
+        component: "backend"
+        action: "dev"
+        depends_on: ["start-database"]
+      
+      - name: "dev-frontend"
+        component: "frontend"
+        action: "dev"
+        depends_on: ["dev-backend"]
+
+# 环境变量配置
+env:
+  - ETHEREUM_RPC_URL
+  - PRIVATE_KEY
+  - AZURE_SPEECH_KEY
+  - ELEVENLABS_API_KEY
+  - LYNDSAY_VOICE_ID=2k1RrkiAltTGNFiT6rL1 

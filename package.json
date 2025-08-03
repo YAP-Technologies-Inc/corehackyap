@@ -1,0 +1,30 @@
+{
+  "name": "yap-project",
+  "version": "1.0.0",
+  "description": "YAP Project with Core deployment",
+  "private": true,
+  "scripts": {
+    "dev": "core dev",
+    "build": "core build",
+    "deploy": "core deploy",
+    "start": "core start",
+    "stop": "core stop",
+    "logs": "core logs",
+    "status": "core status",
+    "docker:up": "docker-compose up -d",
+    "docker:down": "docker-compose down",
+    "docker:build": "docker-compose up --build -d",
+    "install:all": "npm install && cd yap-frontend-v2 && npm install && cd ../YAPBackend && npm install"
+  },
+  "devDependencies": {
+    "@core/cli": "^1.0.0"
+  },
+  "workspaces": [
+    "yap-frontend-v2",
+    "YAPBackend"
+  ],
+  "engines": {
+    "node": ">=18.0.0",
+    "npm": ">=8.0.0"
+  }
+} 
