@@ -55,24 +55,24 @@ async function testDatabaseConnection() {
 // Test database connection on startup
 testDatabaseConnection();
 
-// Ethereum configuration
-const ETHEREUM_RPC_URL = process.env.ETHEREUM_RPC_URL || 'https://mainnet.infura.io/v3/YOUR_INFURA_KEY';
-const YAP_TOKEN_ADDRESS = process.env.YAP_TOKEN_ADDRESS || '0x7873fD9733c68b7d325116D28fAE6ce0A5deE49c';
+// Core blockchain configuration
+const CORE_RPC_URL = process.env.CORE_RPC_URL || 'https://rpc.test2.btcs.network';
+const YAP_TOKEN_ADDRESS = process.env.YAP_TOKEN_ADDRESS || '0x4853BA7b0b02F0AE5A3D540A2B9E79CE70C45a66';
 const PRIVATE_KEY = process.env.PRIVATE_KEY;
 
 // Debug: Log environment variables
 console.log('Environment variables:');
-console.log('ETHEREUM_RPC_URL:', ETHEREUM_RPC_URL);
+console.log('CORE_RPC_URL:', CORE_RPC_URL);
 console.log('YAP_TOKEN_ADDRESS:', YAP_TOKEN_ADDRESS);
 console.log('PRIVATE_KEY:', PRIVATE_KEY ? PRIVATE_KEY.substring(0, 10) + '...' : 'NOT SET');
 
-// Initialize Ethereum provider and wallet
+// Initialize Core blockchain provider and wallet
 let provider, wallet;
 try {
-  provider = new ethers.JsonRpcProvider(ETHEREUM_RPC_URL);
+  provider = new ethers.JsonRpcProvider(CORE_RPC_URL);
   wallet = new ethers.Wallet(PRIVATE_KEY, provider);
 } catch (error) {
-  console.error('Error initializing Ethereum provider:', error);
+  console.error('Error initializing Core provider:', error);
 }
 
 // YAP Token ABI
