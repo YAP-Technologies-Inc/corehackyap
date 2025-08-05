@@ -23,8 +23,8 @@ Create a `.env` file in the root directory:
 # Your private key (without 0x prefix)
 PRIVATE_KEY=your_private_key_here
 
-# Infura API Key
-ETHEREUM_RPC_URL=https://mainnet.infura.io/v3/YOUR_INFURA_KEY
+# Core Blockchain Configuration
+CORE_RPC_URL=https://rpc.test2.btcs.network
 GOERLI_RPC_URL=https://goerli.infura.io/v3/YOUR_INFURA_KEY
 SEPOLIA_RPC_URL=https://sepolia.infura.io/v3/YOUR_INFURA_KEY
 
@@ -101,7 +101,7 @@ NEXT_PUBLIC_TOKEN_ADDRESS=your_deployed_contract_address
 In your backend `.env` file:
 ```env
 YAP_TOKEN_ADDRESS=your_deployed_contract_address
-ETHEREUM_RPC_URL=https://mainnet.infura.io/v3/YOUR_INFURA_KEY
+CORE_RPC_URL=https://rpc.test2.btcs.network
 PRIVATE_KEY=your_private_key_here
 ```
 

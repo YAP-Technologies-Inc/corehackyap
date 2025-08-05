@@ -1,102 +1,102 @@
-# YAP Project Core 设置指南
+# YAP Project Core Setup Guide
 
-## 什么是 Core？
+## What is Core?
 
-Core 是一个现代化的应用部署和管理平台，可以帮助您更高效地构建、部署和管理您的应用。
+Core is a modern application deployment and management platform that helps you build, deploy, and manage your applications more efficiently.
 
-## 安装 Core
+## Install Core
 
 ```bash
-# 安装 Core CLI
+# Install Core CLI
 npm install -g @core/cli
 
-# 验证安装
+# Verify installation
 core --version
 ```
 
-## 项目结构
+## Project Structure
 
 ```
 pondhackathon/
-├── core.yaml          # Core 配置文件
-├── core-deploy.sh     # Core 部署脚本
-├── package.json       # 根项目配置
-├── .coreignore        # Core 忽略文件
-├── yap-frontend-v2/   # 前端应用
-├── YAPBackend/        # 后端 API
-└── yap-token-deployment/ # 智能合约部署
+├── core.yaml          # Core configuration file
+├── core-deploy.sh     # Core deployment script
+├── package.json       # Root project config
+├── .coreignore        # Core ignore file
+├── yap-frontend-v2/   # Frontend application
+├── YAPBackend/        # Backend API
+└── yap-token-deployment/ # Smart contract deployment
 ```
 
-## 快速开始
+## Quick Start
 
-### 1. 安装依赖
+### 1. Install Dependencies
 
 ```bash
-# 安装所有依赖
+# Install all dependencies
 npm run install:all
 ```
 
-### 2. 配置环境变量
+### 2. Configure Environment Variables
 
 ```bash
-# 复制环境变量模板
+# Copy environment template
 cp env.example .env
 
-# 编辑 .env 文件，添加必要的 API 密钥
+# Edit .env file, add necessary API keys
 ```
 
-必需的环境变量：
-- `ETHEREUM_RPC_URL`: 以太坊 RPC URL
-- `PRIVATE_KEY`: 私钥
-- `AZURE_SPEECH_KEY`: Azure 语音服务密钥
-- `ELEVENLABS_API_KEY`: ElevenLabs API 密钥
+Required environment variables:
+- `CORE_RPC_URL`: Core blockchain RPC URL
+- `PRIVATE_KEY`: Private key
+- `AZURE_SPEECH_KEY`: Azure Speech Services key
+- `ELEVENLABS_API_KEY`: ElevenLabs API key
 
-### 3. 使用 Core 部署
+### 3. Deploy with Core
 
 ```bash
-# 开发模式
+# Development mode
 npm run dev
 
-# 生产部署
+# Production deployment
 npm run deploy
 
-# 查看状态
+# Check status
 npm run status
 
-# 查看日志
+# View logs
 npm run logs
 
-# 停止服务
+# Stop services
 npm run stop
 ```
 
-## Core 命令
+## Core Commands
 
-### 基本命令
+### Basic Commands
 
 ```bash
-# 开发模式启动
+# Start development mode
 core dev
 
-# 构建项目
+# Build project
 core build
 
-# 部署到生产环境
+# Deploy to production
 core deploy
 
-# 启动服务
+# Start services
 core start
 
-# 停止服务
+# Stop services
 core stop
 
-# 查看服务状态
+# Check service status
 core status
 
-# 查看日志
+# View logs
 core logs
 
-# 重启服务
+# Restart services
 core restart
 ```
 

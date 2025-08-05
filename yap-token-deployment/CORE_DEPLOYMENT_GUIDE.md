@@ -28,7 +28,7 @@ CORE_RPC_URL=https://rpc.coredao.org
 CORE_TESTNET_RPC_URL=https://rpc.test.btcs.network
 
 # 以太坊 RPC URL (保留原有配置)
-ETHEREUM_RPC_URL=https://mainnet.infura.io/v3/YOUR_INFURA_KEY
+CORE_RPC_URL=https://rpc.test2.btcs.network
 GOERLI_RPC_URL=https://goerli.infura.io/v3/YOUR_INFURA_KEY
 SEPOLIA_RPC_URL=https://sepolia.infura.io/v3/YOUR_INFURA_KEY
 
