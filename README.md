@@ -109,8 +109,8 @@ yap-integration-main/
 
 #### 1. Clone Repository
 ```bash
-git clone https://github.com/YAP-Technologies-Inc/pondhackathon.git
-cd pondhackathon
+git clone https://github.com/YAP-Technologies-Inc/corehackyap.git
+cd corehackyap/hackathon
 ```
 
 #### 2. Configure Environment
@@ -154,8 +154,8 @@ docker-compose down
 
 ### 1. Clone Repository
 ```bash
-git clone https://github.com/YAP-Technologies-Inc/pondhackathon.git
-cd pondhackathon
+git clone https://github.com/YAP-Technologies-Inc/corehackyap.git
+cd corehackyap/hackathon
 ```
 
 ### 2. Install Dependencies
