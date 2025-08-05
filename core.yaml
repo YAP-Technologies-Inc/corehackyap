@@ -92,7 +92,7 @@ workflows:
 
 # 环境变量配置
 env:
-  - ETHEREUM_RPC_URL
+  - CORE_RPC_URL
   - PRIVATE_KEY
   - AZURE_SPEECH_KEY
   - ELEVENLABS_API_KEY
