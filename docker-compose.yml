@@ -48,6 +48,11 @@ services:
     build:
       context: ./yap-frontend-v2
       dockerfile: Dockerfile
+      args:
+        - NEXT_PUBLIC_TOKEN_ADDRESS=0x4853BA7b0b02F0AE5A3D540A2B9E79CE70C45a66
+        - NEXT_PUBLIC_NETWORK_ID=1114
+        - NEXT_PUBLIC_API_URL=http://localhost:3001
+        - NEXT_PUBLIC_ELEVENLABS_VOICE_ID=2k1RrkiAltTGNFiT6rL1
     container_name: yap-frontend
     environment:
       - NEXT_PUBLIC_TOKEN_ADDRESS=0x4853BA7b0b02F0AE5A3D540A2B9E79CE70C45a66

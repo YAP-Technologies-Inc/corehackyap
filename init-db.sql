@@ -5,7 +5,10 @@
 CREATE TABLE IF NOT EXISTS users (
     user_id VARCHAR(42) PRIMARY KEY,
     wallet_address VARCHAR(42) UNIQUE,
-    name VARCHAR(255)
+    name VARCHAR(255),
+    email VARCHAR(255),
+    password_hash VARCHAR(255),
+    language_to_learn VARCHAR(50) DEFAULT 'spanish'
 );
 
 -- Create lessons table

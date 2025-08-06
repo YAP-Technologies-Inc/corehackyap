@@ -14,7 +14,7 @@ export default function LessonPage() {
   const params = useParams();
   const lessonId = params.lessonId as string;
   const { pushToast } = useToast();
-  const { account, isConnected } = useMetaMask();
+  const { account, isConnected, network } = useMetaMask();
   const { getBalance } = useYAPToken();
 
   const [isCompleting, setIsCompleting] = useState(false);
@@ -22,6 +22,12 @@ export default function LessonPage() {
   const handleLessonComplete = async () => {
     if (!isConnected || !account) {
       pushToast('Please connect MetaMask wallet to receive token rewards', 'warning');
+      return;
+    }
+
+    // Check if connected to the correct network
+    if (network && network.chainId !== BigInt(1114)) {
+      pushToast('Please switch to Core Testnet2 network to receive token rewards', 'warning');
       return;
     }
 
@@ -48,10 +54,29 @@ export default function LessonPage() {
         await new Promise(resolve => setTimeout(resolve, 3000));
         
         // Update token balance multiple times to ensure it's fresh
-        await getBalance();
+        console.log('🔄 Refreshing YAP balance after lesson completion...');
+        let newBalance = await getBalance();
+        console.log('📊 New balance after first refresh:', newBalance);
+        
+        // Additional refreshes with delays
         setTimeout(async () => {
-          await getBalance();
-        }, 1000);
+          console.log('🔄 Second balance refresh...');
+          newBalance = await getBalance();
+          console.log('📊 New balance after second refresh:', newBalance);
+        }, 2000);
+        
+        setTimeout(async () => {
+          console.log('🔄 Third balance refresh...');
+          newBalance = await getBalance();
+          console.log('📊 New balance after third refresh:', newBalance);
+        }, 5000);
+        
+        // Force a final refresh after 8 seconds
+        setTimeout(async () => {
+          console.log('🔄 Final balance refresh...');
+          newBalance = await getBalance();
+          console.log('📊 Final balance:', newBalance);
+        }, 8000);
         
         pushToast(`Congratulations! You earned 1 YAP token reward! Transaction hash: ${result.transactionHash}`, 'success');
         

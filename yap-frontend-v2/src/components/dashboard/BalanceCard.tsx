@@ -5,7 +5,6 @@ import { useYAPToken } from '@/hooks/useYAPToken';
 import { useEffect } from 'react';
 
 export default function BalanceCard() {
-  const { balance: ethBalance } = useMetaMask();
   const { balance: yapBalance, getBalance, isLoading } = useYAPToken();
 
   // Auto-refresh balance when component mounts
@@ -36,12 +35,7 @@ export default function BalanceCard() {
             <p className="text-sm text-indigo-100">Token Balance</p>
           </div>
         </div>
-        <div className="text-right">
-          <div className="bg-gradient-to-r from-emerald-500 to-teal-500 rounded-lg p-4 shadow-md border-2 border-emerald-400">
-            <p className="text-sm text-emerald-50 font-medium">ETH Balance</p>
-            <p className="text-xl font-bold text-white">{parseFloat(ethBalance).toFixed(4)} ETH</p>
-          </div>
-        </div>
+
       </div>
       
       {/* Refresh Button - Better Design */}

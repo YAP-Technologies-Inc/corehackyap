@@ -5,7 +5,7 @@
 [![Core Blockchain](https://img.shields.io/badge/Core-Blockchain-orange?style=for-the-badge&logo=blockchain)](https://coredao.org/)
 [![License](https://img.shields.io/badge/License-MIT-green?style=for-the-badge)](LICENSE)
 
-A complete Web3 language learning application with token rewards and consumption system built for the Core Connect Global Buildathon. Earn YAP tokens by completing Spanish lessons and spend them on AI-powered language learning features. Now deployed on Core Blockchain!
+A complete Web3 language learning application with token rewards and consumption system built for the Core Connect Global Buildathon. Earn YAP tokens by completing Spanish lessons and spend them on AI-powered language learning features. **Now fully deployed and tested on Core Blockchain Testnet2!**
 
 ## 🎯 **Quick Setup Guide**
 
@@ -19,10 +19,12 @@ docker-compose up --build -d
 ```
 
 **✅ What You Get:**
-- Pre-configured Core Blockchain testnet connection
-- Deployed YAP Token contract ready to use: `0x4853BA7b0b02F0AE5A3D540A2B9E79CE70C45a66`
-- Complete database setup
-- Full stack application
+- ✅ **Pre-configured Core Blockchain Testnet2 connection**
+- ✅ **Deployed YAP Token contract**: `0x4853BA7b0b02F0AE5A3D540A2B9E79CE70C45a66`
+- ✅ **Complete database setup with PostgreSQL**
+- ✅ **Full stack application with MetaMask integration**
+- ✅ **Bottom navigation with Home and Profile tabs**
+- ✅ **Real-time token balance updates**
 
 ## 🚀 Features
 
@@ -35,9 +37,10 @@ docker-compose up --build -d
 
 ### 🔗 MetaMask Wallet Integration
 - Seamless MetaMask wallet connection
-- Automatic network switching to Core Blockchain
-- Real-time YAP token and CORE balance display
+- **Automatic network switching to Core Testnet2 (Chain ID: 1114)**
+- Real-time YAP token and TCORE2 balance display
 - Secure transaction handling on Core network
+- **Network validation and error handling**
 
 ### 🎓 Language Learning Platform
 - Spanish language lessons with interactive content
@@ -60,19 +63,20 @@ docker-compose up --build -d
 ## 📁 Project Structure
 
 ```
-yap-integration-main/
+hackathon/
 ├── yap-frontend-v2/               # Next.js frontend application
 │   ├── src/
 │   │   ├── app/                   # Next.js app router pages
 │   │   │   ├── auth/             # Authentication pages
 │   │   │   ├── home/             # Dashboard page
 │   │   │   ├── lesson/           # Lesson pages
-│   │   │   ├── profile/          # User profile
+│   │   │   ├── profile/          # User profile with bottom nav
 │   │   │   └── spanish-teacher/  # AI teacher feature
 │   │   ├── components/            # React components
 │   │   │   ├── auth/             # Authentication components
 │   │   │   ├── dashboard/        # Dashboard components
 │   │   │   ├── lesson/           # Lesson components
+│   │   │   ├── layout/           # Bottom navigation bar
 │   │   │   ├── wallet/           # MetaMask integration
 │   │   │   └── ui/               # UI components
 │   │   ├── hooks/                # Custom React hooks
@@ -84,12 +88,15 @@ yap-integration-main/
 ├── YAPBackend/                   # Node.js backend server
 │   ├── index.js                  # Main server file
 │   ├── azurePronunciation.js     # Azure Speech Services integration
-│   ├── test-elevenlabs.js        # ElevenLabs testing
+│   ├── transfer-tokens.js        # Token transfer utilities
 │   └── uploads/                  # File uploads directory
-└── yap-token-deployment/         # Smart contract deployment
-    ├── contracts/                # Solidity contracts
-    ├── artifacts/                # Compiled contracts
-    └── hardhat.config.js         # Hardhat configuration
+├── yap-token-deployment/         # Smart contract deployment
+│   ├── contracts/                # Solidity contracts
+│   ├── artifacts/                # Compiled contracts
+│   └── hardhat.config.js         # Hardhat configuration
+├── docker-compose.yml            # Docker services configuration
+├── init-db.sql                  # Database initialization
+└── env.example                  # Environment variables template
 ```
 
 ---
@@ -100,12 +107,16 @@ yap-integration-main/
 
 #### Prerequisites
 - **Docker** and **Docker Compose**
-- **Chrome Browser** (recommended for easy MetaMask integration)
-- **Safari Browser** (supported for audio recording functionality)
-- **MetaMask browser extension**
-- **Infura API key** (for Ethereum RPC)
+- **Chrome Browser** (required for MetaMask integration)
+- **MetaMask browser extension** (required - other wallets like Coinbase Wallet are not supported)
 - **ElevenLabs API key** (for text-to-speech)
 - **Azure Speech Services key** (for pronunciation assessment)
+
+**⚠️ Browser & Wallet Requirements:**
+- **Chrome Browser**: Required for MetaMask integration and optimal experience
+- **MetaMask Extension**: Required - this app is specifically designed for MetaMask
+- **Do NOT use**: Coinbase Wallet, Trust Wallet, or other wallet extensions
+- **Safari**: Audio recording works, but MetaMask integration may have issues
 
 #### 1. Clone Repository
 ```bash
@@ -121,6 +132,22 @@ cp env.example .env
 # Edit .env file with your API keys
 nano .env
 ```
+
+**Required Environment Variables:**
+```env
+# Core Blockchain Configuration
+CORE_RPC_URL=https://rpc.test2.btcs.network
+YAP_TOKEN_ADDRESS=0x4853BA7b0b02F0AE5A3D540A2B9E79CE70C45a66
+PRIVATE_KEY=your_private_key_without_0x
+
+# Azure Speech Services (Required for pronunciation assessment)
+AZURE_SPEECH_KEY=your_azure_speech_key
+
+# ElevenLabs API (Required for text-to-speech)
+ELEVENLABS_API_KEY=your_elevenlabs_api_key
+```
+
+**⚠️ Frontend Environment**: The Docker setup automatically includes the frontend environment variables, but for manual setup, you must create `yap-frontend-v2/.env.local` with the required `NEXT_PUBLIC_*` variables.
 
 #### 3. Run with Docker Compose
 ```bash
@@ -143,14 +170,17 @@ docker-compose down
 
 #### Prerequisites
 - **Node.js 18+** 
-- **Chrome Browser** (recommended for easy MetaMask integration)
-- **Safari Browser** (supported for audio recording functionality)
-- **MetaMask browser extension**
+- **Chrome Browser** (required for MetaMask integration)
+- **MetaMask browser extension** (required - other wallets like Coinbase Wallet are not supported)
 - **PostgreSQL database**
-- **Infura API key** (for Ethereum RPC)
-- **Etherscan API key** (for contract verification)
 - **ElevenLabs API key** (for text-to-speech)
 - **Azure Speech Services key** (for pronunciation assessment)
+
+**⚠️ Browser & Wallet Requirements:**
+- **Chrome Browser**: Required for MetaMask integration and optimal experience
+- **MetaMask Extension**: Required - this app is specifically designed for MetaMask
+- **Do NOT use**: Coinbase Wallet, Trust Wallet, or other wallet extensions
+- **Safari**: Audio recording works, but MetaMask integration may have issues
 
 ### 1. Clone Repository
 ```bash
@@ -193,9 +223,8 @@ DB_PORT=5432
 
 # Core Blockchain Configuration
 YAP_TOKEN_ADDRESS=0x4853BA7b0b02F0AE5A3D540A2B9E79CE70C45a66
-CORE_TESTNET_RPC_URL=https://rpc.test2.btcs.network
+CORE_RPC_URL=https://rpc.test2.btcs.network
 PRIVATE_KEY=your_private_key_without_0x
-NETWORK=coreTestnet
 
 # Azure Speech Services (Required for pronunciation assessment)
 AZURE_SPEECH_KEY=your_azure_speech_key
@@ -205,6 +234,12 @@ ELEVENLABS_API_KEY=your_elevenlabs_api_key
 ```
 
 #### Frontend Environment (`yap-frontend-v2/.env.local`)
+```bash
+# Create the .env.local file for the frontend
+cd yap-frontend-v2
+touch .env.local
+```
+
 ```env
 # Core Blockchain Token Contract Address
 NEXT_PUBLIC_TOKEN_ADDRESS=0x4853BA7b0b02F0AE5A3D540A2B9E79CE70C45a66
@@ -217,41 +252,21 @@ NEXT_PUBLIC_API_URL=http://localhost:3001
 NEXT_PUBLIC_ELEVENLABS_VOICE_ID=2k1RrkiAltTGNFiT6rL1
 ```
 
+**⚠️ Important**: The frontend requires a `.env.local` file in the `yap-frontend-v2` directory. This file is not included in the repository for security reasons and must be created manually.
+
 ### 4. API Keys Setup
 
 ## 🌐 Core Testnet2 Resources
 
-### Core Testnet2 Faucet
-
-- **Official Faucet**: https://scan.test2.btcs.network/faucet
-- **Token**: tCORE2 (for gas fees)
-- **Chain ID**: 1114
-- **Network**: Core Blockchain Testnet2
-
-
-
-#### Polygon Mumbai Testnet
-- **Official Faucet**: https://faucet.polygon.technology/
-- **Alternative**: https://mumbaifaucet.com/
-
-#### Binance Smart Chain Testnet
-- **Official Faucet**: https://testnet.binance.org/faucet-smart
-
-### Testnet Configuration
-
-#### Core Blockchain Testnet2 (Current Deployment)
+### Core Testnet2 Configuration
 ```
-Network Name: Core Blockchain Testnet2
+Network Name: Core Testnet2
 RPC URL: https://rpc.test2.btcs.network
 Chain ID: 1114
-Currency Symbol: tCORE2
+Currency Symbol: TCORE2
 Block Explorer: https://scan.test2.btcs.network/
 Faucet: https://scan.test2.btcs.network/faucet
 ```
-
-
-
-
 
 ### How to Get Testnet Tokens
 
@@ -283,7 +298,10 @@ Set up the complete database schema in your PostgreSQL database:
 CREATE TABLE users (
     user_id VARCHAR(42) PRIMARY KEY,
     wallet_address VARCHAR(42) UNIQUE,
-    name VARCHAR(255)
+    name VARCHAR(255),
+    email VARCHAR(255),
+    password_hash VARCHAR(255),
+    language_to_learn VARCHAR(50) DEFAULT 'spanish'
 );
 
 -- Create lessons table
@@ -393,7 +411,7 @@ npm install
 3. **Configure environment** (`.env`):
 ```env
 PRIVATE_KEY=your_metamask_private_key_without_0x
-CORE_TESTNET_RPC_URL=https://rpc.test2.btcs.network
+CORE_RPC_URL=https://rpc.test2.btcs.network
 NETWORK=coreTestnet
 ```
 
@@ -448,7 +466,7 @@ NETWORK=coreTestnet node transfer-tokens.js burn <amount>
 - `POST /api/auth/login` - User login
 
 ### User Management
-- `GET /api/profile/:userId` - Get user profile
+- `GET /api/profile/:identifier` - Get user profile (supports wallet address or user ID)
 - `GET /api/user-stats/:userId` - Get user statistics
 - `GET /api/user-stats/:userId/streak` - Get user streak
 
@@ -468,9 +486,13 @@ NETWORK=coreTestnet node transfer-tokens.js burn <amount>
 ## 🎯 Usage Guide
 
 ### 1. Connect MetaMask Wallet
-1. Install MetaMask browser extension
-2. Click "Connect MetaMask" button
-3. Authorize connection and switch to Ethereum network
+1. **Use Chrome Browser** - required for MetaMask integration
+2. Install **MetaMask browser extension** (do NOT use Coinbase Wallet or other wallets)
+3. Click "Connect MetaMask" button
+4. **Switch to Core Testnet2 network** (Chain ID: 1114)
+5. Authorize connection
+
+**⚠️ Important**: This app is specifically designed for MetaMask. Other wallet extensions like Coinbase Wallet, Trust Wallet, etc. are not supported and will cause connection issues.
 
 ### 2. Complete Lessons to Earn Tokens
 1. Select a lesson from the dashboard
@@ -555,13 +577,23 @@ npm run deploy:local # Deploy to local network
    - Ensure voice ID is set in frontend `.env`
 
 4. **MetaMask Connection Failed**
+   - **Use Chrome Browser** - required for MetaMask integration
+   - **Use MetaMask extension only** - do NOT use Coinbase Wallet or other wallet extensions
    - Ensure MetaMask is installed and unlocked
-   - Check if you're on the correct network (Core Testnet2 - Chain ID: 1114)
-   - Add Core Testnet2 to MetaMask if needed
+   - **Check if you're on the correct network (Core Testnet2 - Chain ID: 1114)**
+   - Add Core Testnet2 to MetaMask if needed:
+     ```
+     Network Name: Core Testnet2
+     RPC URL: https://rpc.test2.btcs.network
+     Chain ID: 1114
+     Currency Symbol: TCORE2
+     Block Explorer URL: https://scan.test2.btcs.network
+     ```
 
 5. **Token Balance Not Loading**
-   - Verify the token contract address is correct
-   - Check if you're connected to the right network
+   - Verify the token contract address is correct: `0x4853BA7b0b02F0AE5A3D540A2B9E79CE70C45a66`
+   - **Check if you're connected to Core Testnet2 (Chain ID: 1114)**
+   - Ensure MetaMask is connected to the correct network
 
 6. **Backend Connection Error**
    - Ensure the backend server is running on port 3001
@@ -570,6 +602,24 @@ npm run deploy:local # Deploy to local network
 7. **Module Not Found Errors**
    - Run `npm install` in the respective directories
    - Clear node_modules and reinstall if needed
+
+8. **Bottom Navigation Not Showing**
+   - Ensure you're using the latest version
+   - Check if the page has proper layout structure
+   - Verify CSS classes are correctly applied
+
+9. **Frontend Environment Variables Not Loading**
+   - Ensure `yap-frontend-v2/.env.local` file exists
+   - Check that all `NEXT_PUBLIC_*` variables are set correctly
+   - Restart the frontend after creating/modifying `.env.local`
+   - For Docker: Check that environment variables are passed in `docker-compose.yml`
+
+10. **Wallet Connection Issues**
+    - **Use Chrome Browser** - other browsers may have MetaMask issues
+    - **Use MetaMask only** - disable other wallet extensions (Coinbase, Trust Wallet, etc.)
+    - Clear browser cache and cookies
+    - Restart browser and try again
+    - Check if MetaMask is unlocked and on the correct network
 
 ### Environment Variables Debug
 ```bash
@@ -583,6 +633,14 @@ node -e "console.log('Azure Key:', process.env.AZURE_SPEECH_KEY ? 'Set' : 'Missi
 - Check `YAPBackend/uploads/debug/` for saved audio files
 - Review browser console for MediaRecorder errors
 - Test microphone permissions in browser settings
+
+### Network Debug
+```bash
+# Test Core Testnet2 connection
+curl -X POST "https://rpc.test2.btcs.network" \
+  -H "Content-Type: application/json" \
+  -d '{"jsonrpc":"2.0","method":"eth_chainId","params":[],"id":1}'
+```
 
 ---
 

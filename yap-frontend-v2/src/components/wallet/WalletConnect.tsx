@@ -1,13 +1,16 @@
 'use client';
 
+import { useRouter } from 'next/navigation';
 import { useMetaMask } from './MetaMaskProvider';
+import { useYAPToken } from '@/hooks/useYAPToken';
 
 export default function WalletConnect() {
-  const { account, balance, isConnected, connect, disconnect, switchToCoreTestnet, forceAccountSelection } = useMetaMask();
+  const router = useRouter();
+  const { account, balance, isConnected, connect, disconnect } = useMetaMask();
+  const { balance: yapBalance } = useYAPToken();
 
   const handleConnect = async () => {
     try {
-      await switchToCoreTestnet();
       await connect();
     } catch (error) {
       console.error('Error connecting wallet:', error);
@@ -18,13 +21,19 @@ export default function WalletConnect() {
     disconnect();
   };
 
-  const handleSwitchAccount = async () => {
-    try {
-      await forceAccountSelection();
-    } catch (error) {
-      console.error('Error switching account:', error);
-    }
+  const handleLogout = () => {
+    // Clear all user data and cache
+    localStorage.clear();
+    sessionStorage.clear();
+    
+    // Disconnect wallet
+    disconnect();
+    
+    // Redirect to auth page
+    router.push('/auth');
   };
+
+
 
   if (!isConnected) {
     return (
@@ -48,21 +57,24 @@ export default function WalletConnect() {
             {account?.slice(0, 6)}...{account?.slice(-4)}
           </p>
           <p className="text-sm text-gray-600">
-            Balance: {parseFloat(balance).toFixed(4)} ETH
+            CORE Balance: {parseFloat(balance).toFixed(4)} TCORE2
+          </p>
+          <p className="text-sm text-gray-600">
+            YAP Balance: {yapBalance} YAP
           </p>
         </div>
         <div className="flex flex-col gap-2">
           <button
-            onClick={handleSwitchAccount}
-            className="bg-yellow-500 text-white px-4 py-2 rounded-lg text-sm hover:bg-yellow-600 transition-colors"
-          >
-            Switch Account
-          </button>
-          <button
             onClick={handleDisconnect}
-            className="bg-red-500 text-white px-4 py-2 rounded-lg text-sm hover:bg-red-600 transition-colors"
+            className="bg-orange-500 text-white px-4 py-2 rounded-lg text-sm hover:bg-orange-600 transition-colors"
           >
             Disconnect
+          </button>
+          <button
+            onClick={handleLogout}
+            className="bg-red-600 text-white px-4 py-2 rounded-lg text-sm hover:bg-red-700 transition-colors"
+          >
+            Logout
           </button>
         </div>
       </div>

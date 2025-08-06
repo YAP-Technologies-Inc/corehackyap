@@ -13,6 +13,7 @@ interface MetaMaskContextType {
   disconnect: () => void;
   switchToCoreTestnet: () => Promise<void>;
   forceAccountSelection: () => Promise<void>;
+  refreshBalance: () => Promise<void>;
 }
 
 const MetaMaskContext = createContext<MetaMaskContextType | undefined>(undefined);
@@ -20,7 +21,19 @@ const MetaMaskContext = createContext<MetaMaskContextType | undefined>(undefined
 export function useMetaMask() {
   const context = useContext(MetaMaskContext);
   if (!context) {
-    throw new Error('useMetaMask must be used within a MetaMaskProvider');
+    // Return a default context instead of throwing an error
+    return {
+      account: null,
+      balance: '0',
+      isConnected: false,
+      provider: null,
+      signer: null,
+      connect: async () => {},
+      disconnect: () => {},
+      switchToCoreTestnet: async () => {},
+      forceAccountSelection: async () => {},
+      refreshBalance: async () => {},
+    };
   }
   return context;
 }
@@ -74,6 +87,25 @@ export function MetaMaskProvider({ children }: MetaMaskProviderProps) {
     }
   }, []);
 
+  // Refresh balance when provider and account are ready
+  useEffect(() => {
+    if (provider && account && isConnected) {
+      const refreshBalanceOnLoad = async () => {
+        try {
+          const balance = await provider.getBalance(account);
+          const formattedBalance = ethers.formatEther(balance);
+          setBalance(formattedBalance);
+          console.log('✅ Balance refreshed on provider ready:', formattedBalance);
+        } catch (error) {
+          console.error('Error refreshing balance on load:', error);
+        }
+      };
+      
+      // Add a small delay to ensure provider is fully ready
+      setTimeout(refreshBalanceOnLoad, 200);
+    }
+  }, [provider, account, isConnected]);
+
   const handleAccountsChanged = async (accounts: string[]) => {
     if (accounts.length === 0) {
       setAccount(null);
@@ -85,18 +117,22 @@ export function MetaMaskProvider({ children }: MetaMaskProviderProps) {
       setAccount(account);
       setIsConnected(true);
 
-      if (provider) {
-        try {
-          const signer = await provider.getSigner();
-          setSigner(signer);
-          
-          const balance = await provider.getBalance(account);
-          const formattedBalance = ethers.formatEther(balance);
-          setBalance(formattedBalance);
-        } catch (error) {
-          console.error('Error getting signer or balance:', error);
+      // Wait a bit for provider to be ready, then get balance
+      setTimeout(async () => {
+        if (provider) {
+          try {
+            const signer = await provider.getSigner();
+            setSigner(signer);
+            
+            const balance = await provider.getBalance(account);
+            const formattedBalance = ethers.formatEther(balance);
+            setBalance(formattedBalance);
+            console.log('✅ Balance loaded on account change:', formattedBalance);
+          } catch (error) {
+            console.error('Error getting signer or balance:', error);
+          }
         }
-      }
+      }, 100);
     }
   };
 
@@ -200,6 +236,19 @@ export function MetaMaskProvider({ children }: MetaMaskProviderProps) {
     }
   };
 
+  const refreshBalance = async () => {
+    if (provider && account) {
+      try {
+        const balance = await provider.getBalance(account);
+        const formattedBalance = ethers.formatEther(balance);
+        setBalance(formattedBalance);
+        console.log('✅ CORE balance refreshed:', formattedBalance);
+      } catch (error) {
+        console.error('Error refreshing CORE balance:', error);
+      }
+    }
+  };
+
   const value: MetaMaskContextType = {
     account,
     balance,
@@ -210,6 +259,7 @@ export function MetaMaskProvider({ children }: MetaMaskProviderProps) {
     disconnect,
     switchToCoreTestnet,
     forceAccountSelection,
+    refreshBalance,
   };
 
   return (

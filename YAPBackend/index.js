@@ -96,9 +96,31 @@ async function sendYAPToWallet(walletAddress, amount) {
   console.log('🔍 yapTokenContract:', !!yapTokenContract);
   console.log('🔍 wallet:', !!wallet);
   
-  // For now, always return mock transaction hash since the contract setup is not working
-  console.log('Using mock transfer for wallet:', walletAddress, 'amount:', amount);
-  return 'mock_transaction_hash';
+  if (!yapTokenContract || !wallet) {
+    console.error('❌ YAP token contract or wallet not initialized');
+    throw new Error('Token contract not available');
+  }
+  
+  try {
+    console.log('🔄 Sending', amount, 'YAP tokens to wallet:', walletAddress);
+    
+    // Convert amount to wei (assuming 18 decimals)
+    const amountInWei = ethers.parseEther(amount.toString());
+    
+    // Send tokens
+    const tx = await yapTokenContract.transfer(walletAddress, amountInWei);
+    console.log('📝 Transaction hash:', tx.hash);
+    
+    // Wait for transaction to be mined
+    const receipt = await tx.wait();
+    console.log('✅ Transaction confirmed!');
+    console.log('📝 Final transaction hash:', receipt.hash);
+    
+    return receipt.hash;
+  } catch (error) {
+    console.error('❌ Error sending YAP tokens:', error);
+    throw error;
+  }
 }
 
 // API Routes
@@ -153,12 +175,29 @@ app.post('/api/complete-lesson', async (req, res) => {
 
     console.log('✅ Lesson completion recorded successfully');
 
-    res.json({
-      success: true,
-      message: 'Lesson completed successfully',
-      tokensEarned: 1,
-      transactionHash: 'lesson_completed_no_transfer_needed'
-    });
+    // Send YAP tokens to the user's wallet
+    try {
+      const transactionHash = await sendYAPToWallet(walletAddress, 1);
+      console.log('✅ YAP tokens sent successfully. Transaction hash:', transactionHash);
+      
+      res.json({
+        success: true,
+        message: 'Lesson completed successfully',
+        tokensEarned: 1,
+        transactionHash: transactionHash
+      });
+    } catch (tokenError) {
+      console.error('❌ Failed to send YAP tokens:', tokenError);
+      
+      // Still return success for lesson completion, but note token transfer failed
+      res.json({
+        success: true,
+        message: 'Lesson completed successfully, but token transfer failed',
+        tokensEarned: 1,
+        transactionHash: 'token_transfer_failed',
+        error: tokenError.message
+      });
+    }
   } catch (error) {
     console.error('Error completing lesson:', error);
     res.status(500).json({ error: 'Failed to complete lesson' });
@@ -253,14 +292,25 @@ app.post('/api/user-stats/:walletAddress/streak', async (req, res) => {
   }
 });
 
-// GET /api/profile/:walletAddress
-app.get('/api/profile/:walletAddress', async (req, res) => {
+// GET /api/profile/:identifier (can be wallet address or user ID)
+app.get('/api/profile/:identifier', async (req, res) => {
   try {
-    const { walletAddress } = req.params;
-    const result = await db.query(
+    const { identifier } = req.params;
+    
+    // Try to find user by wallet address first
+    let result = await db.query(
       'SELECT name, language_to_learn FROM users WHERE wallet_address = $1',
-      [walletAddress]
+      [identifier]
     );
+    
+    // If not found by wallet address, try by user_id
+    if (result.rows.length === 0) {
+      result = await db.query(
+        'SELECT name, language_to_learn FROM users WHERE user_id = $1',
+        [identifier]
+      );
+    }
+    
     if (result.rows.length === 0) {
       return res.status(404).json({ success: false, error: 'User not found' });
     }

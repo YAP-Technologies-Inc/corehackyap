@@ -47,9 +47,13 @@ export const useYAPToken = () => {
 
           // 初始化合约
           const tokenAddress = process.env.NEXT_PUBLIC_TOKEN_ADDRESS;
+          console.log('🔍 Token address from env:', tokenAddress);
           if (tokenAddress) {
             const contract = new ethers.Contract(tokenAddress, tokenAbi, signer);
             setContract(contract);
+            console.log('✅ YAP token contract initialized');
+          } else {
+            console.error('❌ NEXT_PUBLIC_TOKEN_ADDRESS not found in environment variables');
           }
 
         } catch (error) {
@@ -93,10 +97,14 @@ export const useYAPToken = () => {
     const updateBalance = async () => {
       if (contract && account) {
         try {
+          console.log('🔍 Getting YAP balance for account:', account);
           const balance = await contract.balanceOf(account);
-          setBalance(ethers.formatEther(balance));
+          const formattedBalance = ethers.formatEther(balance);
+          setBalance(formattedBalance);
+          console.log('✅ YAP balance updated:', formattedBalance);
         } catch (error) {
           console.error('Failed to get balance:', error);
+          setBalance('0');
         }
       }
     };
@@ -214,6 +222,47 @@ export const useYAPToken = () => {
     return false;
   };
 
+  // Consume YAP tokens
+  const consumeYAP = async (amount: string) => {
+    if (contract && signer) {
+      try {
+        const tx = await contract.burn(ethers.parseEther(amount));
+        await tx.wait();
+        console.log('✅ YAP tokens consumed successfully');
+        return true;
+      } catch (error) {
+        console.error('Failed to consume YAP tokens:', error);
+        throw new Error('Failed to consume YAP tokens');
+      }
+    }
+    throw new Error('Wallet not connected');
+  };
+
+  // Get balance function
+  const getBalance = async () => {
+    if (!contract || !account) {
+      console.log('Wallet not connected, skipping balance check');
+      console.log('🔍 Contract available:', !!contract);
+      console.log('🔍 Account available:', !!account);
+      return '0';
+    }
+    
+    try {
+      console.log('🔍 Getting YAP balance for account:', account);
+      console.log('🔍 Contract address:', contract.target);
+      const balance = await contract.balanceOf(account);
+      const formattedBalance = ethers.formatEther(balance);
+      setBalance(formattedBalance);
+      console.log('✅ YAP balance updated:', formattedBalance);
+      return formattedBalance;
+    } catch (error) {
+      console.error('Failed to get balance:', error);
+      console.error('Error details:', error.message);
+      setBalance('0');
+      return '0';
+    }
+  };
+
   return {
     contract,
     provider,
@@ -228,5 +277,7 @@ export const useYAPToken = () => {
     transferTokens,
     mintTokens,
     burnTokens,
+    consumeYAP,
+    getBalance,
   };
 }; 

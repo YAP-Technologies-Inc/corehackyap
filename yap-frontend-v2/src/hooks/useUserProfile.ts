@@ -18,12 +18,12 @@ export function useUserProfile() {
 
     setIsLoading(true);
     
-    // Generate user ID from wallet address
-    const userId = account.slice(2, 10).toLowerCase();
+    // Use the full wallet address for profile lookup
+    const walletAddress = account;
     
     // Fetch user profile from backend
     const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
-    fetch(`${apiUrl}/api/profile/${userId}`)
+    fetch(`${apiUrl}/api/profile/${walletAddress}`)
       .then(res => res.json())
       .then(data => {
         if (data.name) {
