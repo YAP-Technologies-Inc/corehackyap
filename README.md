@@ -219,20 +219,16 @@ NEXT_PUBLIC_ELEVENLABS_VOICE_ID=2k1RrkiAltTGNFiT6rL1
 
 ### 4. API Keys Setup
 
-## 🌐 Testnet Resources
+## 🌐 Core Testnet2 Resources
 
-### Free Testnet Faucets
+### Core Testnet2 Faucet
 
-#### Core Blockchain Testnet2 (Current)
 - **Official Faucet**: https://scan.test2.btcs.network/faucet
 - **Token**: tCORE2 (for gas fees)
 - **Chain ID**: 1114
 - **Network**: Core Blockchain Testnet2
 
-#### Ethereum Sepolia Testnet
-- **Primary Faucet**: https://sepoliafaucet.com/
-- **Alternative 1**: https://faucet.sepolia.dev/
-- **Alternative 2**: https://sepolia-faucet.pk910.de/
+
 
 #### Polygon Mumbai Testnet
 - **Official Faucet**: https://faucet.polygon.technology/
@@ -253,38 +249,15 @@ Block Explorer: https://scan.test2.btcs.network/
 Faucet: https://scan.test2.btcs.network/faucet
 ```
 
-#### Sepolia (Ethereum)
-```
-Network Name: Sepolia
-RPC URL: https://sepolia.infura.io/v3/YOUR_KEY
-Chain ID: 11155111
-Currency Symbol: ETH
-Block Explorer: https://sepolia.etherscan.io/
-```
 
-#### Mumbai (Polygon)
-```
-Network Name: Mumbai
-RPC URL: https://rpc-mumbai.maticvigil.com
-Chain ID: 80001
-Currency Symbol: MATIC
-Block Explorer: https://mumbai.polygonscan.com/
-```
 
-#### BSC Testnet
-```
-Network Name: BSC Testnet
-RPC URL: https://data-seed-prebsc-1-s1.binance.org:8545/
-Chain ID: 97
-Currency Symbol: tBNB
-Block Explorer: https://testnet.bscscan.com/
-```
+
 
 ### How to Get Testnet Tokens
 
 1. **Connect MetaMask** to your browser
-2. **Switch to the desired testnet** (Sepolia recommended)
-3. **Visit a faucet website** from the list above
+2. **Switch to Core Testnet2** (Chain ID: 1114)
+3. **Visit the Core Testnet2 faucet**: https://scan.test2.btcs.network/faucet
 4. **Enter your wallet address**
 5. **Wait for tokens** to arrive (usually within minutes)
 

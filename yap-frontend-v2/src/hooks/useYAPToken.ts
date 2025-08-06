@@ -25,13 +25,13 @@ export const useYAPToken = () => {
           const network = await provider.getNetwork();
           setNetwork(network.name);
 
-          // 检查是否连接到 Core 区块链
+          // Check if connected to Core blockchain
           if (network.chainId === BigInt(1116)) {
-            console.log('✅ 已连接到 Core 主网');
-          } else if (network.chainId === BigInt(1115)) {
-            console.log('✅ 已连接到 Core 测试网');
+            console.log('✅ Connected to Core mainnet');
+          } else if (network.chainId === BigInt(1114)) {
+            console.log('✅ Connected to Core testnet2');
           } else {
-            console.log('⚠️ 请切换到 Core 区块链网络');
+            console.log('⚠️ Please switch to Core blockchain network');
           }
 
           // 获取签名者
@@ -53,7 +53,7 @@ export const useYAPToken = () => {
           }
 
         } catch (error) {
-          console.error('初始化提供者失败:', error);
+          console.error('Failed to initialize provider:', error);
         }
       }
     };
@@ -61,7 +61,7 @@ export const useYAPToken = () => {
     initProvider();
   }, []);
 
-  // 监听账户变化
+  // Listen for account changes
   useEffect(() => {
     if (typeof window !== 'undefined' && window.ethereum) {
       const handleAccountsChanged = (accounts: string[]) => {
@@ -88,7 +88,7 @@ export const useYAPToken = () => {
     }
   }, []);
 
-  // 更新余额
+  // Update balance
   useEffect(() => {
     const updateBalance = async () => {
       if (contract && account) {
@@ -96,7 +96,7 @@ export const useYAPToken = () => {
           const balance = await contract.balanceOf(account);
           setBalance(ethers.formatEther(balance));
         } catch (error) {
-          console.error('获取余额失败:', error);
+          console.error('Failed to get balance:', error);
         }
       }
     };
@@ -104,7 +104,7 @@ export const useYAPToken = () => {
     updateBalance();
   }, [contract, account]);
 
-  // 连接到钱包
+  // Connect to wallet
   const connectWallet = async () => {
     if (typeof window !== 'undefined' && window.ethereum) {
       try {
@@ -114,12 +114,12 @@ export const useYAPToken = () => {
         setAccount(accounts[0]);
         setIsConnected(true);
       } catch (error) {
-        console.error('连接钱包失败:', error);
+        console.error('Failed to connect wallet:', error);
       }
     }
   };
 
-  // 切换到 Core 区块链
+  // Switch to Core blockchain
   const switchToCore = async () => {
     if (typeof window !== 'undefined' && window.ethereum) {
       try {
@@ -149,7 +149,7 @@ export const useYAPToken = () => {
       try {
         await window.ethereum.request({
           method: 'wallet_switchEthereumChain',
-          params: [{ chainId: '0x45B' }], // 1115 in hex
+          params: [{ chainId: '0x45A' }], // 1114 in hex
         });
       } catch (switchError: any) {
         if (switchError.code === 4902) {

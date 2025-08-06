@@ -2,7 +2,7 @@ const fs = require('fs');
 const path = require('path');
 
 function verifySetup() {
-  console.log('🔍 验证 Core 测试网设置...');
+  console.log('🔍 Verifying Core testnet setup...');
 
   const requiredFiles = [
     'CORE_TESTNET_SETUP.md',
@@ -22,28 +22,28 @@ function verifySetup() {
     'YAPBackend'
   ];
 
-  console.log('📁 检查必需目录...');
+  console.log('📁 Checking required directories...');
   requiredDirs.forEach(dir => {
     if (fs.existsSync(dir)) {
       console.log(`  ✅ ${dir}/`);
     } else {
-      console.log(`  ❌ ${dir}/ (缺失)`);
+              console.log(`  ❌ ${dir}/ (missing)`);
     }
   });
 
-  console.log('\n📄 检查必需文件...');
+  console.log('\n📄 Checking required files...');
   let allFilesExist = true;
   requiredFiles.forEach(file => {
     if (fs.existsSync(file)) {
       console.log(`  ✅ ${file}`);
     } else {
-      console.log(`  ❌ ${file} (缺失)`);
+              console.log(`  ❌ ${file} (missing)`);
       allFilesExist = false;
     }
   });
 
-  // 检查 package.json 中的脚本
-  console.log('\n📦 检查 package.json 脚本...');
+  // Check package.json scripts
+  console.log('\n📦 Checking package.json scripts...');
   try {
     const packageJson = JSON.parse(fs.readFileSync('yap-token-deployment/package.json', 'utf8'));
     const requiredScripts = [
@@ -58,48 +58,48 @@ function verifySetup() {
       if (packageJson.scripts && packageJson.scripts[script]) {
         console.log(`  ✅ ${script}`);
       } else {
-        console.log(`  ❌ ${script} (缺失)`);
+        console.log(`  ❌ ${script} (missing)`);
         allFilesExist = false;
       }
     });
   } catch (error) {
-    console.log('  ❌ 无法读取 package.json');
+          console.log('  ❌ Cannot read package.json');
     allFilesExist = false;
   }
 
-  // 检查 hardhat.config.js 中的网络配置
-  console.log('\n🌐 检查 Hardhat 配置...');
+  // Check hardhat.config.js network configuration
+  console.log('\n🌐 Checking Hardhat configuration...');
   try {
     const hardhatConfig = fs.readFileSync('yap-token-deployment/hardhat.config.js', 'utf8');
     
     if (hardhatConfig.includes('coreTestnet')) {
-      console.log('  ✅ Core 测试网配置存在');
+              console.log('  ✅ Core testnet configuration exists');
     } else {
-      console.log('  ❌ Core 测试网配置缺失');
+              console.log('  ❌ Core testnet configuration missing');
       allFilesExist = false;
     }
 
     if (hardhatConfig.includes('1115')) {
-      console.log('  ✅ Chain ID 1115 配置正确');
+              console.log('  ✅ Chain ID 1114 configured correctly');
     } else {
-      console.log('  ❌ Chain ID 1115 配置缺失');
+              console.log('  ❌ Chain ID 1114 configuration missing');
       allFilesExist = false;
     }
   } catch (error) {
-    console.log('  ❌ 无法读取 hardhat.config.js');
+          console.log('  ❌ Cannot read hardhat.config.js');
     allFilesExist = false;
   }
 
-  console.log('\n📋 设置验证结果:');
+  console.log('\n📋 Setup verification results:');
   if (allFilesExist) {
-    console.log('🎉 所有文件都已正确设置！');
-    console.log('\n📋 下一步:');
+          console.log('🎉 All files are correctly set up!');
+      console.log('\n📋 Next steps:');
     console.log('   1. cd hackathon/yap-token-deployment');
     console.log('   2. npm install');
     console.log('   3. npm run verify:testnet');
     console.log('   4. npm run deploy:coreTestnet');
   } else {
-    console.log('⚠️  部分文件缺失，请检查上述错误。');
+          console.log('⚠️  Some files are missing, please check the errors above.');
   }
 }
 

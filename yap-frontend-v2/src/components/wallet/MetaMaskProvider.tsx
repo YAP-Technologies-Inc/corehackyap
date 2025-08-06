@@ -11,7 +11,7 @@ interface MetaMaskContextType {
   signer: ethers.JsonRpcSigner | null;
   connect: () => Promise<void>;
   disconnect: () => void;
-  switchToSepolia: () => Promise<void>;
+  switchToCoreTestnet: () => Promise<void>;
   forceAccountSelection: () => Promise<void>;
 }
 
@@ -107,11 +107,11 @@ export function MetaMaskProvider({ children }: MetaMaskProviderProps) {
     }
 
     try {
-      // First, ensure we're on the correct network (Sepolia)
+      // First, ensure we're on the correct network (Core Testnet2)
       try {
-        await switchToSepolia();
+        await switchToCoreTestnet();
       } catch (networkError) {
-        console.warn('Could not switch to Sepolia network:', networkError);
+        console.warn('Could not switch to Core Testnet2 network:', networkError);
         // Continue anyway, user can manually switch
       }
 
@@ -136,17 +136,17 @@ export function MetaMaskProvider({ children }: MetaMaskProviderProps) {
     setSigner(null);
   };
 
-  const switchToSepolia = async () => {
+  const switchToCoreTestnet = async () => {
     if (typeof window === 'undefined' || !window.ethereum) {
       alert('Please install MetaMask to use this app');
       return;
     }
 
     try {
-      // Switch to Sepolia testnet (chainId: 11155111)
+      // Switch to Core testnet2 (chainId: 1114)
       await window.ethereum.request({
         method: 'wallet_switchEthereumChain',
-        params: [{ chainId: '0xaa36a7' }], // Sepolia testnet
+        params: [{ chainId: '0x45A' }], // Core testnet2
       });
     } catch (switchError: any) {
       // This error code indicates that the chain has not been added to MetaMask
@@ -156,25 +156,25 @@ export function MetaMaskProvider({ children }: MetaMaskProviderProps) {
             method: 'wallet_addEthereumChain',
             params: [
               {
-                chainId: '0xaa36a7',
-                chainName: 'Sepolia Testnet',
+                chainId: '0x45A',
+                chainName: 'Core Blockchain Testnet2',
                 nativeCurrency: {
-                  name: 'Sepolia Ether',
-                  symbol: 'SEP',
+                  name: 'CORE',
+                  symbol: 'CORE',
                   decimals: 18,
                 },
-                rpcUrls: ['https://sepolia.infura.io/v3/5286e08a82b14a18a4964abb9283808f'],
-                blockExplorerUrls: ['https://sepolia.etherscan.io'],
+                rpcUrls: ['https://rpc.test2.btcs.network'],
+                blockExplorerUrls: ['https://scan.test2.btcs.network'],
               },
             ],
           });
         } catch (addError) {
-          console.error('Error adding Sepolia network:', addError);
-          alert('Failed to add Sepolia network to MetaMask');
+          console.error('Error adding Core testnet2 network:', addError);
+          alert('Failed to add Core testnet2 network to MetaMask');
         }
       } else {
-        console.error('Error switching to Sepolia:', switchError);
-        alert('Failed to switch to Sepolia network');
+        console.error('Error switching to Core testnet2:', switchError);
+        alert('Failed to switch to Core testnet2 network');
       }
     }
   };
@@ -208,7 +208,7 @@ export function MetaMaskProvider({ children }: MetaMaskProviderProps) {
     signer,
     connect,
     disconnect,
-    switchToSepolia,
+    switchToCoreTestnet,
     forceAccountSelection,
   };
 

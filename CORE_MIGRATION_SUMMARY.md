@@ -8,7 +8,7 @@
 
 ### 1. 智能合约配置
 - ✅ 更新了 `hardhat.config.js` 以支持 Core 区块链
-- ✅ 添加了 Core 主网 (Chain ID: 1116) 和测试网 (Chain ID: 1115) 配置
+- ✅ Added Core mainnet (Chain ID: 1116) and testnet2 (Chain ID: 1114) configuration
 - ✅ 创建了专门的 Core 部署脚本 (`deploy-core.js`)
 - ✅ 创建了 Core 合约验证脚本 (`verify-core.js`)
 
@@ -104,7 +104,7 @@ NETWORK=core node transfer-tokens.js burn <amount>
 
 ### 网络详情
 - **主网 Chain ID**: 1116
-- **测试网 Chain ID**: 1115
+- **Testnet2 Chain ID**: 1114
 - **主网 RPC**: https://rpc.coredao.org
 - **测试网 RPC**: https://rpc.test.btcs.network
 - **主网浏览器**: https://scan.coredao.org

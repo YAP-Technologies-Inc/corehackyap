@@ -3,11 +3,11 @@
 import { useMetaMask } from './MetaMaskProvider';
 
 export default function WalletConnect() {
-  const { account, balance, isConnected, connect, disconnect, switchToSepolia, forceAccountSelection } = useMetaMask();
+  const { account, balance, isConnected, connect, disconnect, switchToCoreTestnet, forceAccountSelection } = useMetaMask();
 
   const handleConnect = async () => {
     try {
-      await switchToSepolia();
+      await switchToCoreTestnet();
       await connect();
     } catch (error) {
       console.error('Error connecting wallet:', error);
