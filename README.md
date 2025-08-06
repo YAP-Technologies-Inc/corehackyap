@@ -10,6 +10,7 @@ A complete Web3 language learning application with token rewards and consumption
 YAP has also submitted to the cryptopond hackathon based on the Ethereum chain.
 
 Here is a demo of YAP: https://youtu.be/6sHiTrfvfjU 
+
 Slide Deck Presentation of YAP: https://drive.google.com/file/d/1CUzMxFpNudLiqLQHyU8i67WGzVJhKqvL/view?usp=sharing 
 
 ## 🎯 **Quick Setup Guide**
