@@ -7,6 +7,10 @@
 
 A complete Web3 language learning application with token rewards and consumption system built for the Core Connect Global Buildathon. Earn YAP tokens by completing Spanish lessons and spend them on AI-powered language learning features. **Now fully deployed and tested on Core Blockchain Testnet2!**
 
+YAP has also submitted to the cryptopond hackathon based on the Ethereum chain.
+
+Here is a demo of YAP: https://youtu.be/6sHiTrfvfjU 
+
 ## 🎯 **Quick Setup Guide**
 
 **🚀 Ready to Run in 4 Steps:**
